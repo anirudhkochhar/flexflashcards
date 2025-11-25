@@ -16,6 +16,10 @@ struct PracticeDeckView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
+                Text("Practice cards: \(practiceEntries.count)")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 if let entry = currentEntry {
                     VStack(spacing: 12) {
                         Text(entry.german)
