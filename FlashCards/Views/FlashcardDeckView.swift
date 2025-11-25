@@ -30,25 +30,26 @@ struct FlashcardSessionView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            if let entry = currentEntry {
-                FlashcardView(entry: entry, orientation: orientation, showAnswer: showAnswer)
-                    .frame(maxWidth: .infinity, minHeight: 240)
-                    .onTapGesture { withAnimation { showAnswer.toggle() } }
-                    .animation(.easeInOut, value: showAnswer)
+                if let entry = currentEntry {
+                    FlashcardView(entry: entry, orientation: orientation, showAnswer: showAnswer)
+                        .frame(maxWidth: .infinity, minHeight: 240)
+                        .onTapGesture { withAnimation { showAnswer.toggle() } }
+                        .animation(.easeInOut, value: showAnswer)
 
-                HStack {
-                    Button(action: { addToPractice(entry) }) {
-                        Label(practiceStore.isActive(entry) ? "Already Practicing" : "I got it wrong", systemImage: "exclamationmark.circle")
-                    }
-                    .disabled(practiceStore.isActive(entry))
-                    .buttonStyle(.bordered)
+                    HStack {
+                        Button(action: { addToPractice(entry) }) {
+                            Label(practiceStore.isActive(entry) ? "Already Practicing" : "I got it wrong", systemImage: "exclamationmark.circle")
+                        }
+                        .disabled(practiceStore.isActive(entry))
+                        .buttonStyle(.bordered)
 
-                    Button(action: { nextCard() }) {
-                        Label("Next", systemImage: "arrow.right.circle")
+                        Button(action: { primaryAction(for: entry) }) {
+                            Label(showAnswer ? "Next" : "Show answer",
+                                  systemImage: showAnswer ? "arrow.right.circle" : "eye")
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .buttonStyle(.borderedProminent)
-                }
-            } else {
+                } else {
                 Text("No cards to show.")
                     .foregroundColor(.secondary)
             }
@@ -87,6 +88,16 @@ struct FlashcardSessionView: View {
     private func addToPractice(_ entry: VocabularyEntry) {
         practiceStore.markWrong(for: entry)
     }
+
+    private func primaryAction(for entry: VocabularyEntry) {
+        if showAnswer {
+            nextCard()
+        } else {
+            withAnimation {
+                showAnswer = true
+            }
+        }
+    }
 }
 
 private struct FlashcardView: View {
@@ -99,11 +110,18 @@ private struct FlashcardView: View {
             Text(promptTitle)
                 .font(.headline)
                 .foregroundColor(.secondary)
-            Text(showAnswer ? answerText : questionText)
+            Text(questionText)
                 .font(.title)
                 .fontWeight(.semibold)
                 .multilineTextAlignment(.center)
                 .padding()
+            if showAnswer {
+                Text(answerText)
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .multilineTextAlignment(.center)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
             if showAnswer, orientation == .englishToGerman, let plural = entry.plural {
                 Text("Plural: \(plural)")
                     .foregroundColor(.secondary)
