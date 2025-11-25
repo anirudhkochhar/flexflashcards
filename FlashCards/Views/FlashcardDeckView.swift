@@ -25,9 +25,11 @@ struct FlashcardSessionView: View {
     @ObservedObject var practiceStore: PracticeStore
     var onCardComplete: ((VocabularyEntry) -> Void)? = nil
 
-    @State private var currentIndex: Int = 0
+    @State private var currentIndex: Int?
     @State private var showAnswer: Bool = false
     @State private var orientation: CardOrientation = .germanToEnglish
+    @State private var remainingIndices: [Int] = []
+    @State private var entriesSignature: String = ""
 
     var body: some View {
         VStack(spacing: 16) {
@@ -66,23 +68,47 @@ struct FlashcardSessionView: View {
             Spacer()
         }
         .padding()
-        .onAppear { prepareDeck() }
+        .onAppear { syncDeckWithEntries(force: true) }
+        .onChange(of: entriesSignatureValue) { _ in
+            syncDeckWithEntries(force: true)
+        }
+    }
+
+    private var entriesSignatureValue: String {
+        entries.map(\.id).joined(separator: "|")
     }
 
     private var currentEntry: VocabularyEntry? {
-        guard !entries.isEmpty else { return nil }
-        return entries[currentIndex % entries.count]
+        guard let idx = currentIndex, entries.indices.contains(idx) else { return nil }
+        return entries[idx]
     }
 
-    private func prepareDeck() {
-        guard !entries.isEmpty else { return }
-        currentIndex = Int.random(in: 0..<entries.count)
-        showAnswer = false
+    private func syncDeckWithEntries(force: Bool = false) {
+        if entries.isEmpty {
+            currentIndex = nil
+            remainingIndices = []
+            showAnswer = false
+            entriesSignature = ""
+            return
+        }
+        let newSignature = entriesSignatureValue
+        if force || newSignature != entriesSignature || currentIndex == nil {
+            entriesSignature = newSignature
+            remainingIndices = Array(entries.indices).shuffled()
+            currentIndex = remainingIndices.isEmpty ? nil : remainingIndices.removeFirst()
+            showAnswer = false
+        }
     }
 
     private func nextCard() {
-        guard !entries.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % entries.count
+        guard !entries.isEmpty else {
+            currentIndex = nil
+            return
+        }
+        if remainingIndices.isEmpty {
+            remainingIndices = Array(entries.indices).shuffled()
+        }
+        currentIndex = remainingIndices.removeFirst()
         showAnswer = false
     }
 

@@ -6,11 +6,15 @@ struct VocabularyEntry: Identifiable, Codable, Hashable {
     let plural: String?
     let english: String
 
-    init(german: String, plural: String?, english: String) {
+    init(id: String? = nil, german: String, plural: String?, english: String) {
         self.german = german.trimmingCharacters(in: .whitespacesAndNewlines)
         self.plural = plural?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty
         self.english = english.trimmingCharacters(in: .whitespacesAndNewlines)
-        self.id = VocabularyEntry.makeIdentifier(german: self.german, english: self.english)
+        if let providedID = id {
+            self.id = providedID
+        } else {
+            self.id = VocabularyEntry.makeIdentifier(german: self.german, english: self.english)
+        }
     }
 
     static func makeIdentifier(german: String, english: String) -> String {

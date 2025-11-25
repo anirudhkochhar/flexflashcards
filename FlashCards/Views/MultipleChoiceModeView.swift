@@ -18,6 +18,8 @@ struct MultipleChoiceSessionView: View {
     @State private var selectedAnswer: String?
     @State private var feedback: String?
     @State private var questionCompleted = false
+    @State private var queueSignature: String = ""
+    @State private var remainingIndices: [Int] = []
 
     private var poolEntries: [VocabularyEntry] {
         guard allowsPoolSelection else { return entries }
@@ -102,6 +104,15 @@ struct MultipleChoiceSessionView: View {
             guard allowsPoolSelection else { return }
             generateQuestion()
         }
+        .onChange(of: queueKey) { _ in
+            remainingIndices.removeAll()
+            generateQuestion()
+        }
+    }
+
+    private var queueKey: String {
+        let sourceEntries = allowsPoolSelection ? poolEntries : entries
+        return sourceEntries.map(\.id).joined(separator: "|")
     }
 
     private var feedbackColor: Color {
@@ -129,15 +140,17 @@ struct MultipleChoiceSessionView: View {
         questionCompleted = false
         selectedAnswer = nil
         feedback = nil
-        guard !poolEntries.isEmpty else {
+        let availableEntries = allowsPoolSelection ? poolEntries : entries
+        syncQueue(for: availableEntries)
+        guard let nextIndex = popNextIndex() else {
             currentQuestion = nil
             return
         }
-        let entry = poolEntries.randomElement()!
+        let entry = availableEntries[nextIndex]
         let orientation: CardOrientation = Bool.random() ? .germanToEnglish : .englishToGerman
         let prompt = orientation == .germanToEnglish ? entry.german : entry.english
         let answer = orientation == .germanToEnglish ? entry.english : entry.german
-        let distractors = makeDistractors(for: entry, orientation: orientation)
+        let distractors = makeDistractors(for: entry, orientation: orientation, in: availableEntries)
         currentQuestion = MultipleChoiceQuestion(entry: entry,
                                                  orientation: orientation,
                                                  prompt: prompt,
@@ -145,10 +158,13 @@ struct MultipleChoiceSessionView: View {
                                                  options: (distractors + [answer]).shuffled())
     }
 
-    private func makeDistractors(for entry: VocabularyEntry, orientation: CardOrientation) -> [String] {
+    private func makeDistractors(for entry: VocabularyEntry,
+                                 orientation: CardOrientation,
+                                 in availableEntries: [VocabularyEntry]? = nil) -> [String] {
         var options = Set<String>()
         options.insert(orientation == .germanToEnglish ? entry.english : entry.german)
-        let shuffled = entries.shuffled()
+        let source = availableEntries ?? entries
+        let shuffled = source.shuffled()
         for candidate in shuffled {
             let option = orientation == .germanToEnglish ? candidate.english : candidate.german
             if options.contains(option) { continue }
@@ -157,6 +173,22 @@ struct MultipleChoiceSessionView: View {
         }
         options.remove(orientation == .germanToEnglish ? entry.english : entry.german)
         return Array(options).prefix(3).map { String($0) }
+    }
+
+    private func syncQueue(for currentEntries: [VocabularyEntry]) {
+        let newSignature = currentEntries.map(\.id).joined(separator: "|")
+        if newSignature != queueSignature {
+            queueSignature = newSignature
+            remainingIndices = Array(currentEntries.indices).shuffled()
+        }
+        if remainingIndices.isEmpty && !currentEntries.isEmpty {
+            remainingIndices = Array(currentEntries.indices).shuffled()
+        }
+    }
+
+    private func popNextIndex() -> Int? {
+        guard !remainingIndices.isEmpty else { return nil }
+        return remainingIndices.removeFirst()
     }
 }
 

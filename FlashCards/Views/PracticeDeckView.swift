@@ -62,7 +62,9 @@ private struct PracticeFlashcardSessionView: View {
     @ObservedObject var practiceStore: PracticeStore
 
     @State private var showAnswer = false
-    @State private var currentIndex = 0
+    @State private var currentIndex: Int?
+    @State private var remainingIndices: [Int] = []
+    @State private var entriesSignature: String = ""
 
     var body: some View {
         if let entry = currentEntry {
@@ -111,19 +113,45 @@ private struct PracticeFlashcardSessionView: View {
                     .buttonStyle(.bordered)
                 }
             }
-            .onChange(of: entries.count) { _ in reset() }
+            .onChange(of: entriesSignatureValue) { _ in
+                syncDeck()
+            }
+            .onAppear { syncDeck() }
         }
     }
 
     private var currentEntry: VocabularyEntry? {
-        guard !entries.isEmpty else { return nil }
-        let index = currentIndex % entries.count
-        return entries[index]
+        guard let idx = currentIndex, entries.indices.contains(idx) else { return nil }
+        return entries[idx]
+    }
+
+    private var entriesSignatureValue: String {
+        entries.map(\.id).joined(separator: "|")
+    }
+
+    private func syncDeck() {
+        if entries.isEmpty {
+            currentIndex = nil
+            remainingIndices = []
+            showAnswer = false
+            entriesSignature = ""
+            return
+        }
+        let newSignature = entriesSignatureValue
+        if newSignature != entriesSignature || currentIndex == nil {
+            entriesSignature = newSignature
+            remainingIndices = Array(entries.indices).shuffled()
+            currentIndex = remainingIndices.isEmpty ? nil : remainingIndices.removeFirst()
+            showAnswer = false
+        }
     }
 
     private func advance() {
         guard !entries.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % entries.count
+        if remainingIndices.isEmpty {
+            remainingIndices = Array(entries.indices).shuffled()
+        }
+        currentIndex = remainingIndices.removeFirst()
         showAnswer = false
     }
 
@@ -138,8 +166,10 @@ private struct PracticeFlashcardSessionView: View {
     }
 
     private func reset() {
-        currentIndex = 0
+        currentIndex = nil
+        remainingIndices = []
         showAnswer = false
+        syncDeck()
     }
 
     private func progressLabel(for entry: VocabularyEntry) -> String {

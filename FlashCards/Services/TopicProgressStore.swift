@@ -3,6 +3,7 @@ import Foundation
 struct TopicProgressState: Codable {
     var completedCardIDs: Set<String> = []
     var completionCount: Int = 0
+    var completedRuns: Set<Int> = []
 
     var completedCount: Int {
         completedCardIDs.count
@@ -43,6 +44,7 @@ final class TopicProgressStore: ObservableObject {
         var state = states[topic.id] ?? TopicProgressState()
         if incrementCompletion {
             state.completionCount += 1
+            state.completedRuns.insert(state.completionCount)
         }
         state.completedCardIDs = []
         states[topic.id] = state

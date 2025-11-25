@@ -26,7 +26,7 @@ enum VocabularyLoader {
         for url in bundleURLs {
             let fileName = url.deletingPathExtension().lastPathComponent
             do {
-                let entries = try parseEntries(from: url)
+                let entries = try parseEntries(from: url, sourcePrefix: fileName, isUserTopic: false)
                 guard !entries.isEmpty else { continue }
                 topics.append(VocabularyTopic(name: fileName, entries: entries, sourceURL: nil))
             } catch {
@@ -37,7 +37,8 @@ enum VocabularyLoader {
         for url in userURLs {
             let fileName = url.deletingPathExtension().lastPathComponent
             do {
-                let entries = try parseEntries(from: url)
+                let prefix = url.standardizedFileURL.path.replacingOccurrences(of: "/", with: "-")
+                let entries = try parseEntries(from: url, sourcePrefix: prefix, isUserTopic: true)
                 guard !entries.isEmpty else { continue }
                 topics.append(VocabularyTopic(name: fileName, entries: entries, sourceURL: url))
             } catch {
@@ -48,7 +49,7 @@ enum VocabularyLoader {
         return topics.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    private static func parseEntries(from url: URL) throws -> [VocabularyEntry] {
+    private static func parseEntries(from url: URL, sourcePrefix: String, isUserTopic: Bool) throws -> [VocabularyEntry] {
         let contents = try String(contentsOf: url, encoding: .utf8)
         let rows = contents
             .components(separatedBy: .newlines)
@@ -57,13 +58,15 @@ enum VocabularyLoader {
         guard rows.count > 1 else { return [] }
 
         var entries: [VocabularyEntry] = []
-        for row in rows.dropFirst() {
+        for (index, row) in rows.dropFirst().enumerated() {
             let columns = row.splitCSV()
             guard columns.count >= 3 else { continue }
             let german = columns[0]
             let plural = columns[1].isEmpty ? nil : columns[1]
             let english = columns[2]
-            entries.append(VocabularyEntry(german: german, plural: plural, english: english))
+            let prefix = isUserTopic ? "user-\(sourcePrefix)" : "bundle-\(sourcePrefix)"
+            let id = "\(prefix)-row-\(index)"
+            entries.append(VocabularyEntry(id: id, german: german, plural: plural, english: english))
         }
         return entries
     }
