@@ -1,0 +1,10 @@
+# Ignore CSV vocab files and asset catalogs to keep repository light
+csv_files/
+FlashCards/Resources/*.csv
+FlashCards/Resources/csv_files/
+FlashCards/Assets.xcassets/
+FlashCards/Preview Content/
+.DS_Store
+FlashCards.xcodeproj/xcuserdata/
+FlashCards.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/

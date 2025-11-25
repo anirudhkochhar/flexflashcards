@@ -1,0 +1,412 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+	1BFC39302B1FF8D200F6A019 /* FlashCardsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39102B1FF8D200F6A019 /* FlashCardsApp.swift */; };
+	1BFC39312B1FF8D200F6A019 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39112B1FF8D200F6A019 /* ContentView.swift */; };
+	1BFC39322B1FF8D200F6A019 /* VocabularyEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39122B1FF8D200F6A019 /* VocabularyEntry.swift */; };
+	1BFC39332B1FF8D200F6A019 /* PracticeCardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39132B1FF8D200F6A019 /* PracticeCardState.swift */; };
+	1BFC39342B1FF8D200F6A019 /* VocabularyLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39142B1FF8D200F6A019 /* VocabularyLoader.swift */; };
+	1BFC39352B1FF8D200F6A019 /* PracticeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39152B1FF8D200F6A019 /* PracticeStore.swift */; };
+	1BFC39362B1FF8D200F6A019 /* FlashcardDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39162B1FF8D200F6A019 /* FlashcardDeckView.swift */; };
+	1BFC39372B1FF8D200F6A019 /* PracticeDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39172B1FF8D200F6A019 /* PracticeDeckView.swift */; };
+	1BFC39382B1FF8D200F6A019 /* MultipleChoiceModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39182B1FF8D200F6A019 /* MultipleChoiceModeView.swift */; };
+	1BFC39392B1FF8D200F6A019 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BFC39192B1FF8D200F6A019 /* Assets.xcassets */; };
+	1BFC39402B1FFB6A00F6A019 /* csv_files in Resources */ = {isa = PBXBuildFile; fileRef = 1BFC39412B1FFB6A00F6A019 /* csv_files */; };
+	1BFC39422B1FFC6F00F6A019 /* VocabularyTopic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39442B1FFC6F00F6A019 /* VocabularyTopic.swift */; };
+	1BFC39432B1FFC6F00F6A019 /* TopicModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */; };
+	1BFC39462B20047800F6A019 /* TopicFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39472B20047800F6A019 /* TopicFileManager.swift */; };
+	1BFC393B2B1FF8D200F6A019 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BFC391B2B1FF8D200F6A019 /* Preview Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+	1BFC390B2B1FF8D200F6A019 /* FlashCards.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlashCards.app; sourceTree = BUILT_PRODUCTS_DIR; };
+	1BFC39102B1FF8D200F6A019 /* FlashCardsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashCardsApp.swift; sourceTree = "<group>"; };
+	1BFC39112B1FF8D200F6A019 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+	1BFC39122B1FF8D200F6A019 /* VocabularyEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyEntry.swift; sourceTree = "<group>"; };
+	1BFC39132B1FF8D200F6A019 /* PracticeCardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeCardState.swift; sourceTree = "<group>"; };
+	1BFC39142B1FF8D200F6A019 /* VocabularyLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyLoader.swift; sourceTree = "<group>"; };
+	1BFC39152B1FF8D200F6A019 /* PracticeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeStore.swift; sourceTree = "<group>"; };
+	1BFC39162B1FF8D200F6A019 /* FlashcardDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashcardDeckView.swift; sourceTree = "<group>"; };
+	1BFC39172B1FF8D200F6A019 /* PracticeDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeDeckView.swift; sourceTree = "<group>"; };
+	1BFC39182B1FF8D200F6A019 /* MultipleChoiceModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleChoiceModeView.swift; sourceTree = "<group>"; };
+	1BFC39192B1FF8D200F6A019 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+	1BFC39412B1FFB6A00F6A019 /* csv_files */ = {isa = PBXFileReference; lastKnownFileType = folder; path = csv_files; sourceTree = "<group>"; };
+	1BFC39442B1FFC6F00F6A019 /* VocabularyTopic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTopic.swift; sourceTree = "<group>"; };
+	1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicModeView.swift; sourceTree = "<group>"; };
+	1BFC39472B20047800F6A019 /* TopicFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicFileManager.swift; sourceTree = "<group>"; };
+	1BFC391B2B1FF8D200F6A019 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+	1BFC391C2B1FF8D200F6A019 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+	1BFC39042B1FF8D200F6A019 /* Frameworks */ = {
+		isa = PBXFrameworksBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+	1BFC39012B1FF8D200F6A019 = {
+		isa = PBXGroup;
+		children = (
+			1BFC39202B1FF8D200F6A019 /* FlashCards */,
+			1BFC39022B1FF8D200F6A019 /* Products */,
+		);
+		sourceTree = "<group>";
+	};
+	1BFC39022B1FF8D200F6A019 /* Products */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC390B2B1FF8D200F6A019 /* FlashCards.app */,
+		);
+		name = Products;
+		sourceTree = "<group>";
+	};
+	1BFC39202B1FF8D200F6A019 /* FlashCards */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC39102B1FF8D200F6A019 /* FlashCardsApp.swift */,
+			1BFC39112B1FF8D200F6A019 /* ContentView.swift */,
+			1BFC39212B1FF8D200F6A019 /* Models */,
+			1BFC39222B1FF8D200F6A019 /* Services */,
+			1BFC39232B1FF8D200F6A019 /* Views */,
+			1BFC39192B1FF8D200F6A019 /* Assets.xcassets */,
+			1BFC39242B1FF8D200F6A019 /* Resources */,
+			1BFC39252B1FF8D200F6A019 /* Preview Content */,
+			1BFC391C2B1FF8D200F6A019 /* Info.plist */,
+		);
+		path = FlashCards;
+		sourceTree = "<group>";
+	};
+	1BFC39212B1FF8D200F6A019 /* Models */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC39122B1FF8D200F6A019 /* VocabularyEntry.swift */,
+			1BFC39132B1FF8D200F6A019 /* PracticeCardState.swift */,
+			1BFC39442B1FFC6F00F6A019 /* VocabularyTopic.swift */,
+		);
+		path = Models;
+		sourceTree = "<group>";
+	};
+	1BFC39222B1FF8D200F6A019 /* Services */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC39142B1FF8D200F6A019 /* VocabularyLoader.swift */,
+			1BFC39152B1FF8D200F6A019 /* PracticeStore.swift */,
+			1BFC39472B20047800F6A019 /* TopicFileManager.swift */,
+		);
+		path = Services;
+		sourceTree = "<group>";
+	};
+	1BFC39232B1FF8D200F6A019 /* Views */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC39162B1FF8D200F6A019 /* FlashcardDeckView.swift */,
+			1BFC39172B1FF8D200F6A019 /* PracticeDeckView.swift */,
+			1BFC39182B1FF8D200F6A019 /* MultipleChoiceModeView.swift */,
+			1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */,
+		);
+		path = Views;
+		sourceTree = "<group>";
+	};
+	1BFC39242B1FF8D200F6A019 /* Resources */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC39412B1FFB6A00F6A019 /* csv_files */,
+		);
+		path = Resources;
+		sourceTree = "<group>";
+	};
+	1BFC39252B1FF8D200F6A019 /* Preview Content */ = {
+		isa = PBXGroup;
+		children = (
+			1BFC391B2B1FF8D200F6A019 /* Preview Assets.xcassets */,
+		);
+		path = "Preview Content";
+		sourceTree = "<group>";
+	};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+	1BFC39032B1FF8D200F6A019 /* FlashCards */ = {
+		isa = PBXNativeTarget;
+		buildConfigurationList = 1BFC390A2B1FF8D200F6A019 /* Build configuration list for PBXNativeTarget "FlashCards" */;
+		buildPhases = (
+			1BFC39062B1FF8D200F6A019 /* Sources */,
+			1BFC39042B1FF8D200F6A019 /* Frameworks */,
+			1BFC39052B1FF8D200F6A019 /* Resources */,
+		);
+		buildRules = (
+		);
+		dependencies = (
+		);
+		name = FlashCards;
+		productName = FlashCards;
+		productReference = 1BFC390B2B1FF8D200F6A019 /* FlashCards.app */;
+		productType = "com.apple.product-type.application";
+	};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+	1BFC39002B1FF8D200F6A019 /* Project object */ = {
+		isa = PBXProject;
+		attributes = {
+			LastSwiftUpdateCheck = 1500;
+			LastUpgradeCheck = 1500;
+			TargetAttributes = {
+				1BFC39032B1FF8D200F6A019 = {
+					ProvisioningStyle = Automatic;
+				};
+			};
+		};
+		buildConfigurationList = 1BFC39092B1FF8D200F6A019 /* Build configuration list for PBXProject "FlashCards" */;
+		compatibilityVersion = "Xcode 14.0";
+		developmentRegion = en;
+		hasScannedForEncodings = 0;
+		knownRegions = (
+			en,
+			Base,
+		);
+		mainGroup = 1BFC39012B1FF8D200F6A019;
+		productRefGroup = 1BFC39022B1FF8D200F6A019 /* Products */;
+		projectDirPath = "";
+		projectRoot = "";
+		targets = (
+			1BFC39032B1FF8D200F6A019 /* FlashCards */,
+		);
+	};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+	1BFC39052B1FF8D200F6A019 /* Resources */ = {
+		isa = PBXResourcesBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+			1BFC39392B1FF8D200F6A019 /* Assets.xcassets in Resources */,
+			1BFC393B2B1FF8D200F6A019 /* Preview Assets.xcassets in Resources */,
+			1BFC39402B1FFB6A00F6A019 /* csv_files in Resources */,
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+	1BFC39062B1FF8D200F6A019 /* Sources */ = {
+		isa = PBXSourcesBuildPhase;
+		buildActionMask = 2147483647;
+		files = (
+			1BFC39312B1FF8D200F6A019 /* ContentView.swift in Sources */,
+			1BFC39432B1FFC6F00F6A019 /* TopicModeView.swift in Sources */,
+			1BFC39332B1FF8D200F6A019 /* PracticeCardState.swift in Sources */,
+			1BFC39352B1FF8D200F6A019 /* PracticeStore.swift in Sources */,
+			1BFC39462B20047800F6A019 /* TopicFileManager.swift in Sources */,
+			1BFC39422B1FFC6F00F6A019 /* VocabularyTopic.swift in Sources */,
+			1BFC39322B1FF8D200F6A019 /* VocabularyEntry.swift in Sources */,
+			1BFC39362B1FF8D200F6A019 /* FlashcardDeckView.swift in Sources */,
+			1BFC39382B1FF8D200F6A019 /* MultipleChoiceModeView.swift in Sources */,
+			1BFC39342B1FF8D200F6A019 /* VocabularyLoader.swift in Sources */,
+			1BFC39372B1FF8D200F6A019 /* PracticeDeckView.swift in Sources */,
+			1BFC39302B1FF8D200F6A019 /* FlashCardsApp.swift in Sources */,
+		);
+		runOnlyForDeploymentPostprocessing = 0;
+	};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+	1BFC39072B1FF8D200F6A019 /* Debug */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ALWAYS_SEARCH_USER_PATHS = NO;
+			CLANG_ANALYZER_NONNULL = YES;
+			CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+			CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+			CLANG_ENABLE_MODULES = YES;
+			CLANG_ENABLE_OBJC_ARC = YES;
+			CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+			CLANG_WARN_BOOL_CONVERSION = YES;
+			CLANG_WARN_COMMA = YES;
+			CLANG_WARN_CONSTANT_CONVERSION = YES;
+			CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+			CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+			CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+			CLANG_WARN_EMPTY_BODY = YES;
+			CLANG_WARN_ENUM_CONVERSION = YES;
+			CLANG_WARN_INFINITE_RECURSION = YES;
+			CLANG_WARN_INT_CONVERSION = YES;
+			CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+			CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+			CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+			CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+			CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+			CLANG_WARN_STRICT_PROTOTYPES = YES;
+			CLANG_WARN_SUSPICIOUS_MOVE = YES;
+			CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+			CODE_SIGN_STYLE = Automatic;
+			COPY_PHASE_STRIP = NO;
+			DEBUG_INFORMATION_FORMAT = dwarf;
+			ENABLE_STRICT_OBJC_MSGSEND = YES;
+			ENABLE_TESTABILITY = YES;
+			GCC_C_LANGUAGE_STANDARD = gnu17;
+			GCC_DYNAMIC_NO_PIC = NO;
+			GCC_NO_COMMON_BLOCKS = YES;
+			GCC_OPTIMIZATION_LEVEL = 0;
+			GCC_PREPROCESSOR_DEFINITIONS = (
+				"DEBUG=1",
+				"$(inherited)",
+			);
+			GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+			GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+			GCC_WARN_UNDECLARED_SELECTOR = YES;
+			GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+			GCC_WARN_UNUSED_FUNCTION = YES;
+			GCC_WARN_UNUSED_VARIABLE = YES;
+			IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+			MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+			MTL_FAST_MATH = YES;
+			ONLY_ACTIVE_ARCH = YES;
+			SDKROOT = iphoneos;
+			SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+			SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			SWIFT_VERSION = 5.0;
+		};
+		name = Debug;
+	};
+	1BFC39082B1FF8D200F6A019 /* Release */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ALWAYS_SEARCH_USER_PATHS = NO;
+			CLANG_ANALYZER_NONNULL = YES;
+			CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+			CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+			CLANG_ENABLE_MODULES = YES;
+			CLANG_ENABLE_OBJC_ARC = YES;
+			CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+			CLANG_WARN_BOOL_CONVERSION = YES;
+			CLANG_WARN_COMMA = YES;
+			CLANG_WARN_CONSTANT_CONVERSION = YES;
+			CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+			CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+			CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+			CLANG_WARN_EMPTY_BODY = YES;
+			CLANG_WARN_ENUM_CONVERSION = YES;
+			CLANG_WARN_INFINITE_RECURSION = YES;
+			CLANG_WARN_INT_CONVERSION = YES;
+			CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+			CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+			CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+			CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+			CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+			CLANG_WARN_STRICT_PROTOTYPES = YES;
+			CLANG_WARN_SUSPICIOUS_MOVE = YES;
+			CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+			CODE_SIGN_STYLE = Automatic;
+			COPY_PHASE_STRIP = NO;
+			DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			ENABLE_NS_ASSERTIONS = NO;
+			ENABLE_STRICT_OBJC_MSGSEND = YES;
+			GCC_C_LANGUAGE_STANDARD = gnu17;
+			GCC_NO_COMMON_BLOCKS = YES;
+			GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+			GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+			GCC_WARN_UNDECLARED_SELECTOR = YES;
+			GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+			GCC_WARN_UNUSED_FUNCTION = YES;
+			GCC_WARN_UNUSED_VARIABLE = YES;
+			IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+			MTL_ENABLE_DEBUG_INFO = NO;
+			MTL_FAST_MATH = YES;
+			SDKROOT = iphoneos;
+			SWIFT_COMPILATION_MODE = wholemodule;
+			SWIFT_OPTIMIZATION_LEVEL = "-O";
+			SWIFT_VERSION = 5.0;
+			VALIDATE_PRODUCT = YES;
+		};
+		name = Release;
+	};
+	1BFC390D2B1FF8D200F6A019 /* Debug */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+			CODE_SIGN_STYLE = Automatic;
+			CURRENT_PROJECT_VERSION = 1;
+			DEVELOPMENT_ASSET_PATHS = "\"FlashCards/Preview Content\"";
+			DEVELOPMENT_TEAM = "";
+			ENABLE_PREVIEWS = YES;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = FlashCards/Info.plist;
+			INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+			INFOPLIST_KEY_UILaunchScreen_Generation = NO;
+			INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+			IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+			LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = com.example.FlashCards;
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			SWIFT_EMIT_LOC_STRINGS = YES;
+			SWIFT_VERSION = 5.0;
+			TARGETED_DEVICE_FAMILY = 1;
+		};
+		name = Debug;
+	};
+	1BFC390E2B1FF8D200F6A019 /* Release */ = {
+		isa = XCBuildConfiguration;
+		buildSettings = {
+			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+			CODE_SIGN_STYLE = Automatic;
+			CURRENT_PROJECT_VERSION = 1;
+			DEVELOPMENT_ASSET_PATHS = "\"FlashCards/Preview Content\"";
+			DEVELOPMENT_TEAM = "";
+			ENABLE_PREVIEWS = YES;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = FlashCards/Info.plist;
+			INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+			INFOPLIST_KEY_UILaunchScreen_Generation = NO;
+			INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+			IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+			LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = com.example.FlashCards;
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			SWIFT_EMIT_LOC_STRINGS = YES;
+			SWIFT_VERSION = 5.0;
+			TARGETED_DEVICE_FAMILY = 1;
+		};
+		name = Release;
+	};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+	1BFC39092B1FF8D200F6A019 /* Build configuration list for PBXProject "FlashCards" */ = {
+		isa = XCConfigurationList;
+		buildConfigurations = (
+			1BFC39072B1FF8D200F6A019 /* Debug */,
+			1BFC39082B1FF8D200F6A019 /* Release */,
+		);
+		defaultConfigurationIsVisible = 0;
+		defaultConfigurationName = Release;
+	};
+	1BFC390A2B1FF8D200F6A019 /* Build configuration list for PBXNativeTarget "FlashCards" */ = {
+		isa = XCConfigurationList;
+		buildConfigurations = (
+			1BFC390D2B1FF8D200F6A019 /* Debug */,
+			1BFC390E2B1FF8D200F6A019 /* Release */,
+		);
+		defaultConfigurationIsVisible = 0;
+		defaultConfigurationName = Release;
+	};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1BFC39002B1FF8D200F6A019 /* Project object */;
+}
