@@ -55,9 +55,8 @@ Imported files are copied into the app’s Documents directory and included on t
 
 ## Using the App
 
-- **Flashcards tab** – Flip between German→English or English→German, tap “I got it wrong” to push cards into the practice queue.
-- **Topics tab** – Choose a CSV-derived topic and study it via flashcards or multiple choice.
-- **Practice tab** – Cycles only the cards you flagged as wrong; they stay until answered correctly 5 times.
-- **Multiple Choice tab** – Drill either the whole deck or only the practice subset; wrong answers re-queue the card automatically.
+- **Flashcards tab** – Flip between German→English or English→German, tap “I got it wrong” to push cards into the shared practice queue.
+- **Topics tab** – Choose a CSV-derived topic and study it via flashcards or multiple choice; missed answers also flow into the global practice list.
+- **Practice tab** – Shows only the cards you flagged as wrong. Use the segmented control at the top to switch between flashcard practice and multiple-choice drills; cards remain here until you answer them correctly five consecutive times.
 
 Data about wrong/right streaks is stored locally in `UserDefaults`, so your progress persists between launches.

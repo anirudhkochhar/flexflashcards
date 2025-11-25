@@ -1,19 +1,5 @@
 import SwiftUI
 
-struct MultipleChoiceModeView: View {
-    let entries: [VocabularyEntry]
-    @ObservedObject var practiceStore: PracticeStore
-
-    var body: some View {
-        NavigationView {
-            MultipleChoiceSessionView(entries: entries,
-                                      practiceStore: practiceStore,
-                                      allowsPoolSelection: true)
-                .navigationTitle("Multiple Choice")
-        }
-    }
-}
-
 struct MultipleChoiceSessionView: View {
     enum CardPool: String, CaseIterable, Identifiable {
         case all = "Full deck"

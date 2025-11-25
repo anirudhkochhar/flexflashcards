@@ -3,8 +3,7 @@ import UniformTypeIdentifiers
 
 struct TopicModeView: View {
     @EnvironmentObject private var vocabularyStore: VocabularyStore
-    @ObservedObject var flashcardPractice: PracticeStore
-    @ObservedObject var multipleChoicePractice: PracticeStore
+    @ObservedObject var practiceStore: PracticeStore
 
     @State private var showImporter = false
     @State private var isImporting = false
@@ -30,8 +29,7 @@ struct TopicModeView: View {
                     } else {
                         List(topics) { topic in
                             NavigationLink(destination: TopicDetailView(topic: topic,
-                                                                        flashcardPractice: flashcardPractice,
-                                                                        multipleChoicePractice: multipleChoicePractice)) {
+                                                                        practiceStore: practiceStore)) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(topic.displayName)
                                         .font(.headline)
@@ -149,8 +147,7 @@ private struct TopicDetailView: View {
     }
 
     let topic: VocabularyTopic
-    @ObservedObject var flashcardPractice: PracticeStore
-    @ObservedObject var multipleChoicePractice: PracticeStore
+    @ObservedObject var practiceStore: PracticeStore
 
     @State private var selectedMode: TopicMode = .flashcards
 
@@ -165,10 +162,10 @@ private struct TopicDetailView: View {
 
             switch selectedMode {
             case .flashcards:
-                FlashcardSessionView(entries: topic.entries, practiceStore: flashcardPractice)
+                FlashcardSessionView(entries: topic.entries, practiceStore: practiceStore)
             case .multipleChoice:
                 MultipleChoiceSessionView(entries: topic.entries,
-                                          practiceStore: multipleChoicePractice,
+                                          practiceStore: practiceStore,
                                           allowsPoolSelection: false)
             }
 

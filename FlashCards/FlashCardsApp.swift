@@ -3,13 +3,11 @@ import SwiftUI
 @main
 struct FlashCardsApp: App {
     @StateObject private var vocabularyStore = VocabularyStore()
-    @StateObject private var flashcardPractice = PracticeStore(storageKey: "flashcard-practice", requiredCorrectStreak: 5)
-    @StateObject private var multipleChoicePractice = PracticeStore(storageKey: "multiple-choice-practice", requiredCorrectStreak: 5)
+    @StateObject private var practiceStore = PracticeStore(storageKey: "flashcard-practice", requiredCorrectStreak: 5)
 
     var body: some Scene {
         WindowGroup {
-            ContentView(flashcardPractice: flashcardPractice,
-                        multipleChoicePractice: multipleChoicePractice)
+            ContentView(practiceStore: practiceStore)
                 .environmentObject(vocabularyStore)
         }
     }

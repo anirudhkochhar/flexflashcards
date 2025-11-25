@@ -2,8 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var vocabularyStore: VocabularyStore
-    @ObservedObject var flashcardPractice: PracticeStore
-    @ObservedObject var multipleChoicePractice: PracticeStore
+    @ObservedObject var practiceStore: PracticeStore
 
     var body: some View {
         if let error = vocabularyStore.loadError {
@@ -20,25 +19,19 @@ struct ContentView: View {
             .padding()
         } else {
             TabView {
-                FlashcardDeckView(entries: vocabularyStore.entries, practiceStore: flashcardPractice)
+                FlashcardDeckView(entries: vocabularyStore.entries, practiceStore: practiceStore)
                     .tabItem {
                         Label("Flashcards", systemImage: "rectangle.on.rectangle")
                     }
 
-                TopicModeView(flashcardPractice: flashcardPractice,
-                              multipleChoicePractice: multipleChoicePractice)
+                TopicModeView(practiceStore: practiceStore)
                     .tabItem {
                         Label("Topics", systemImage: "folder")
                     }
 
-                PracticeDeckView(entries: vocabularyStore.entries, practiceStore: flashcardPractice)
+                PracticeDeckView(entries: vocabularyStore.entries, practiceStore: practiceStore)
                     .tabItem {
                         Label("Practice", systemImage: "repeat")
-                    }
-
-                MultipleChoiceModeView(entries: vocabularyStore.entries, practiceStore: multipleChoicePractice)
-                    .tabItem {
-                        Label("Multiple Choice", systemImage: "list.bullet.rectangle")
                     }
             }
         }
