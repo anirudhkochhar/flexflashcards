@@ -133,36 +133,42 @@ final class TopicFileManager {
 
     private func unzipArchive(at sourceURL: URL, to destinationURL: URL) throws {
         let archiveData = try Data(contentsOf: sourceURL)
-        var offset = 0
+        guard let centralDirectoryOffset = findCentralDirectoryOffset(in: archiveData) else {
+            throw TopicImportError.copyFailed
+        }
+
+        var index = centralDirectoryOffset
+        let centralDirectorySignature: UInt32 = 0x02014B50
         let localHeaderSignature: UInt32 = 0x04034B50
-        while offset + 30 <= archiveData.count {
-            let signature = archiveData.readUInt32LE(at: offset)
-            if signature != localHeaderSignature {
+
+        while index + 46 <= archiveData.count {
+            let signature = archiveData.readUInt32LE(at: index)
+            if signature != centralDirectorySignature {
                 break
             }
-            let generalPurposeFlag = archiveData.readUInt16LE(at: offset + 6)
-            let compressionMethod = archiveData.readUInt16LE(at: offset + 8)
-            let compressedSize = archiveData.readUInt32LE(at: offset + 18)
-            let uncompressedSize = archiveData.readUInt32LE(at: offset + 22)
-            let fileNameLength = Int(archiveData.readUInt16LE(at: offset + 26))
-            let extraFieldLength = Int(archiveData.readUInt16LE(at: offset + 28))
 
-            guard generalPurposeFlag & 0x8 == 0 else {
-                throw TopicImportError.copyFailed
-            }
+            let compressionMethod = archiveData.readUInt16LE(at: index + 10)
+            let compressedSize = Int(archiveData.readUInt32LE(at: index + 20))
+            let uncompressedSize = Int(archiveData.readUInt32LE(at: index + 24))
+            let fileNameLength = Int(archiveData.readUInt16LE(at: index + 28))
+            let extraFieldLength = Int(archiveData.readUInt16LE(at: index + 30))
+            let commentLength = Int(archiveData.readUInt16LE(at: index + 32))
+            let localHeaderOffset = Int(archiveData.readUInt32LE(at: index + 42))
 
-            let nameStart = offset + 30
+            let nameStart = index + 46
             let nameEnd = nameStart + fileNameLength
-            guard nameEnd <= archiveData.count else {
-                throw TopicImportError.copyFailed
-            }
+            guard nameEnd <= archiveData.count else { throw TopicImportError.copyFailed }
             let nameData = archiveData.subdata(in: nameStart..<nameEnd)
             let fileName = String(data: nameData, encoding: .utf8) ?? UUID().uuidString
-            let dataStart = nameEnd + extraFieldLength
-            let dataEnd = dataStart + Int(compressedSize)
-            guard dataEnd <= archiveData.count else {
+
+            guard archiveData.readUInt32LE(at: localHeaderOffset) == localHeaderSignature else {
                 throw TopicImportError.copyFailed
             }
+            let localNameLength = Int(archiveData.readUInt16LE(at: localHeaderOffset + 26))
+            let localExtraLength = Int(archiveData.readUInt16LE(at: localHeaderOffset + 28))
+            let dataStart = localHeaderOffset + 30 + localNameLength + localExtraLength
+            let dataEnd = dataStart + compressedSize
+            guard dataEnd <= archiveData.count else { throw TopicImportError.copyFailed }
 
             let entryURL = destinationURL.appendingPathComponent(fileName)
             try fileManager.createDirectory(at: entryURL.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -173,17 +179,17 @@ final class TopicFileManager {
                 let entryData = archiveData.subdata(in: dataStart..<dataEnd)
                 let outputData: Data
                 switch compressionMethod {
-                case 0: // stored
+                case 0:
                     outputData = entryData
-                case 8: // deflate
-                    outputData = try inflate(data: entryData, expectedSize: Int(uncompressedSize))
+                case 8:
+                    outputData = try inflate(data: entryData, expectedSize: uncompressedSize)
                 default:
                     throw TopicImportError.copyFailed
                 }
                 try outputData.write(to: entryURL)
             }
 
-            offset = dataEnd
+            index = nameEnd + extraFieldLength + commentLength
         }
     }
 
@@ -199,7 +205,7 @@ final class TopicFileManager {
                                         src_ptr: UnsafePointer(dummySrc),
                                         src_size: 0,
                                         state: nil)
-        var status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
+        let status = compression_stream_init(&stream, COMPRESSION_STREAM_DECODE, COMPRESSION_ZLIB)
         guard status != COMPRESSION_STATUS_ERROR else {
             throw TopicImportError.copyFailed
         }
@@ -233,18 +239,37 @@ final class TopicFileManager {
         }
         return output
     }
+
+    private func findCentralDirectoryOffset(in data: Data) -> Int? {
+        let eocdSignature: UInt32 = 0x06054B50
+        let minEOCDSize = 22
+        guard data.count >= minEOCDSize else { return nil }
+        let searchStart = max(0, data.count - 65_535 - minEOCDSize)
+        var index = data.count - minEOCDSize
+        while index >= searchStart {
+            if data.readUInt32LE(at: index) == eocdSignature {
+                return Int(data.readUInt32LE(at: index + 16))
+            }
+            index -= 1
+        }
+        return nil
+    }
 }
 
 private extension Data {
     func readUInt16LE(at offset: Int) -> UInt16 {
-        let range = offset..<(offset + 2)
-        let value = self[range].withUnsafeBytes { $0.load(as: UInt16.self) }
-        return UInt16(littleEndian: value)
+        precondition(offset + 2 <= count)
+        let byte0 = UInt16(self[offset])
+        let byte1 = UInt16(self[offset + 1]) << 8
+        return byte0 | byte1
     }
 
     func readUInt32LE(at offset: Int) -> UInt32 {
-        let range = offset..<(offset + 4)
-        let value = self[range].withUnsafeBytes { $0.load(as: UInt32.self) }
-        return UInt32(littleEndian: value)
+        precondition(offset + 4 <= count)
+        var value: UInt32 = 0
+        for i in 0..<4 {
+            value |= UInt32(self[offset + i]) << (8 * UInt32(i))
+        }
+        return value
     }
 }

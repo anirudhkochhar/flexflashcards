@@ -31,8 +31,14 @@ final class VocabularyStore: ObservableObject {
             topics = try VocabularyLoader.loadTopics(userDirectory: topicFileManager.topicsDirectory)
             loadError = nil
         } catch let error as VocabularyLoader.LoaderError {
-            loadError = error
-            topics = []
+            switch error {
+            case .fileMissing:
+                topics = []
+                loadError = nil
+            default:
+                loadError = error
+                topics = []
+            }
         } catch {
             loadError = .fileMissing
             topics = []
