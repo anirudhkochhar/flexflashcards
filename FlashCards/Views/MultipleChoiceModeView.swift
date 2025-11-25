@@ -11,11 +11,13 @@ struct MultipleChoiceSessionView: View {
     let entries: [VocabularyEntry]
     @ObservedObject var practiceStore: PracticeStore
     var allowsPoolSelection: Bool
+    var onQuestionFinished: ((VocabularyEntry) -> Void)? = nil
 
     @State private var pool: CardPool = .all
     @State private var currentQuestion: MultipleChoiceQuestion?
     @State private var selectedAnswer: String?
     @State private var feedback: String?
+    @State private var questionCompleted = false
 
     private var poolEntries: [VocabularyEntry] {
         guard allowsPoolSelection else { return entries }
@@ -110,6 +112,10 @@ struct MultipleChoiceSessionView: View {
     private func select(_ option: String, for question: MultipleChoiceQuestion) {
         guard selectedAnswer == nil else { return }
         selectedAnswer = option
+        if !questionCompleted {
+            questionCompleted = true
+            onQuestionFinished?(question.entry)
+        }
         if option == question.answer {
             feedback = "Correct!"
             practiceStore.markCorrect(for: question.entry)
@@ -120,6 +126,7 @@ struct MultipleChoiceSessionView: View {
     }
 
     private func generateQuestion() {
+        questionCompleted = false
         selectedAnswer = nil
         feedback = nil
         guard !poolEntries.isEmpty else {

@@ -23,6 +23,7 @@ struct FlashcardDeckView: View {
 struct FlashcardSessionView: View {
     let entries: [VocabularyEntry]
     @ObservedObject var practiceStore: PracticeStore
+    var onCardComplete: ((VocabularyEntry) -> Void)? = nil
 
     @State private var currentIndex: Int = 0
     @State private var showAnswer: Bool = false
@@ -91,6 +92,7 @@ struct FlashcardSessionView: View {
 
     private func primaryAction(for entry: VocabularyEntry) {
         if showAnswer {
+            onCardComplete?(entry)
             nextCard()
         } else {
             withAnimation {

@@ -56,7 +56,7 @@ Imported files are copied into the app’s Documents directory and included on t
 ## Using the App
 
 - **Flashcards tab** – Flip between German→English or English→German, tap “I got it wrong” to push cards into the shared practice queue.
-- **Topics tab** – Choose a CSV-derived topic and study it via flashcards or multiple choice; missed answers also flow into the global practice list. Swipe left on an imported topic to delete it—this removes the file and any associated practice history.
+- **Topics tab** – Choose a CSV-derived topic and study it via flashcards or multiple choice; missed answers also flow into the global practice list. Each topic shows a progress bar with how many cards are done vs. left, plus a completion counter. When a topic is finished you can restart it (which increments the counter) or swipe left on imported topics to delete them entirely.
 - **Practice tab** – Shows only the cards you flagged as wrong. Use the segmented control at the top to switch between flashcard practice and multiple-choice drills; cards remain here until you answer them correctly five consecutive times.
 
 Data about wrong/right streaks is stored locally in `UserDefaults`, so your progress persists between launches.

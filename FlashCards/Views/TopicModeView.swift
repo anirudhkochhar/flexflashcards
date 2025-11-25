@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 struct TopicModeView: View {
     @EnvironmentObject private var vocabularyStore: VocabularyStore
     @ObservedObject var practiceStore: PracticeStore
+    @EnvironmentObject private var topicProgressStore: TopicProgressStore
 
     @State private var showImporter = false
     @State private var isImporting = false
@@ -31,14 +32,7 @@ struct TopicModeView: View {
                         List(topics) { topic in
                             NavigationLink(destination: TopicDetailView(topic: topic,
                                                                         practiceStore: practiceStore)) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(topic.displayName)
-                                        .font(.headline)
-                                    Text("\(topic.entries.count) cards")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                .padding(.vertical, 4)
+                                topicRowContent(for: topic)
                             }
                             .swipeActions(edge: .trailing) {
                                 if topic.isDeletable {
@@ -153,10 +147,38 @@ struct TopicModeView: View {
             .capitalized
     }
 
+    @ViewBuilder
+    private func topicRowContent(for topic: VocabularyTopic) -> some View {
+        let state = topicProgressStore.state(for: topic, entries: topic.entries)
+        let total = topic.entries.count
+        let completed = min(state.completedCardIDs.count, total)
+        VStack(alignment: .leading, spacing: 6) {
+            Text(topic.displayName)
+                .font(.headline)
+            if total > 0 {
+                ProgressView(value: Double(completed), total: Double(total))
+                    .accentColor(completed >= total && total > 0 ? .green : .accentColor)
+                HStack {
+                    Text("\(completed)/\(total) cards")
+                    Spacer()
+                    Text("Finished \(state.completionCount) times")
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+            } else {
+                Text("No cards in this topic yet.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
     private func delete(_ topic: VocabularyTopic) {
         do {
             try vocabularyStore.deleteTopic(topic)
             practiceStore.remove(entries: topic.entries)
+            topicProgressStore.clear(topic: topic)
             topicPendingDeletion = nil
             activeAlert = .success("\(topic.displayName) deleted.")
         } catch {
@@ -191,11 +213,15 @@ private struct TopicDetailView: View {
 
     let topic: VocabularyTopic
     @ObservedObject var practiceStore: PracticeStore
+    @EnvironmentObject private var topicProgressStore: TopicProgressStore
 
     @State private var selectedMode: TopicMode = .flashcards
 
     var body: some View {
         VStack(spacing: 16) {
+            TopicProgressSummary(topic: topic,
+                                 state: topicProgressStore.state(for: topic, entries: topic.entries),
+                                 resetAction: restartIfNeeded)
             Picker("Mode", selection: $selectedMode) {
                 ForEach(TopicMode.allCases) { mode in
                     Text(mode.rawValue).tag(mode)
@@ -205,16 +231,77 @@ private struct TopicDetailView: View {
 
             switch selectedMode {
             case .flashcards:
-                FlashcardSessionView(entries: topic.entries, practiceStore: practiceStore)
+                FlashcardSessionView(entries: topic.entries,
+                                     practiceStore: practiceStore,
+                                     onCardComplete: { entry in
+                    topicProgressStore.markCompleted(entry, in: topic)
+                })
             case .multipleChoice:
                 MultipleChoiceSessionView(entries: topic.entries,
                                           practiceStore: practiceStore,
-                                          allowsPoolSelection: false)
+                                          allowsPoolSelection: false,
+                                          onQuestionFinished: { entry in
+                    topicProgressStore.markCompleted(entry, in: topic)
+                })
             }
 
             Spacer(minLength: 0)
         }
         .padding()
         .navigationTitle(topic.displayName)
+    }
+
+    private func restartIfNeeded() {
+        let state = topicProgressStore.state(for: topic, entries: topic.entries)
+        guard topic.entries.count > 0,
+              state.completedCardIDs.count >= topic.entries.count else { return }
+        topicProgressStore.reset(topic: topic, incrementCompletion: true)
+    }
+}
+
+private struct TopicProgressSummary: View {
+    let topic: VocabularyTopic
+    let state: TopicProgressState
+    let resetAction: () -> Void
+
+    private var total: Int { topic.entries.count }
+    private var completed: Int { min(state.completedCardIDs.count, total) }
+    private var remaining: Int { max(total - completed, 0) }
+    private var isComplete: Bool {
+        total > 0 && completed >= total
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if total > 0 {
+                ProgressView(value: Double(completed), total: Double(total))
+                    .accentColor(isComplete ? .green : .accentColor)
+                HStack {
+                    Text("\(completed)/\(total) cards")
+                    Spacer()
+                    Text("\(remaining) left")
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+            } else {
+                Text("No cards in this topic yet.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Text("Completed \(state.completionCount) time(s)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            if isComplete {
+                Button("Restart topic") {
+                    resetAction()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
     }
 }
