@@ -50,4 +50,10 @@ final class VocabularyStore: ObservableObject {
         loadVocabulary()
         return result
     }
+
+    func deleteTopic(_ topic: VocabularyTopic) throws {
+        guard let sourceURL = topic.sourceURL else { return }
+        try topicFileManager.deleteImportedTopic(at: sourceURL)
+        loadVocabulary()
+    }
 }

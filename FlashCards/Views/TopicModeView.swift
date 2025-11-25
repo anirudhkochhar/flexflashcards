@@ -8,6 +8,7 @@ struct TopicModeView: View {
     @State private var showImporter = false
     @State private var isImporting = false
     @State private var activeAlert: ImportAlert?
+    @State private var topicPendingDeletion: VocabularyTopic?
 
     private var topics: [VocabularyTopic] {
         vocabularyStore.topics
@@ -38,6 +39,15 @@ struct TopicModeView: View {
                                         .foregroundColor(.secondary)
                                 }
                                 .padding(.vertical, 4)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                if topic.isDeletable {
+                                    Button(role: .destructive) {
+                                        topicPendingDeletion = topic
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -78,13 +88,33 @@ struct TopicModeView: View {
             .alert(item: $activeAlert) { alert in
                 switch alert {
                 case .success(let message):
-                    return Alert(title: Text("Import Complete"),
+                    return Alert(title: Text("Success"),
                                  message: Text(message),
                                  dismissButton: .default(Text("OK")))
                 case .failure(let message):
-                    return Alert(title: Text("Import Failed"),
+                    return Alert(title: Text("Something went wrong"),
                                  message: Text(message),
                                  dismissButton: .default(Text("OK")))
+                }
+            }
+            .confirmationDialog("Delete Topic?",
+                                isPresented: Binding(get: {
+                                    topicPendingDeletion != nil
+                                }, set: { newValue in
+                                    if !newValue {
+                                        topicPendingDeletion = nil
+                                    }
+                                }),
+                                titleVisibility: .visible) {
+                if let topic = topicPendingDeletion {
+                    Button("Delete \(topic.displayName)", role: .destructive) {
+                        delete(topic)
+                    }
+                }
+                Button("Cancel", role: .cancel) { topicPendingDeletion = nil }
+            } message: {
+                if let topic = topicPendingDeletion {
+                    Text("This removes \(topic.displayName) and clears any related practice data.")
                 }
             }
         }
@@ -121,6 +151,19 @@ struct TopicModeView: View {
             .replacingOccurrences(of: "-", with: " ")
             .replacingOccurrences(of: ".csv", with: "", options: .caseInsensitive)
             .capitalized
+    }
+
+    private func delete(_ topic: VocabularyTopic) {
+        do {
+            try vocabularyStore.deleteTopic(topic)
+            practiceStore.remove(entries: topic.entries)
+            topicPendingDeletion = nil
+            activeAlert = .success("\(topic.displayName) deleted.")
+        } catch {
+            topicPendingDeletion = nil
+            let message = (error as? TopicImportError)?.localizedDescription ?? error.localizedDescription
+            activeAlert = .failure(message)
+        }
     }
 
     private enum ImportAlert: Identifiable {

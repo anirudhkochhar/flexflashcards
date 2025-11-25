@@ -102,6 +102,19 @@ final class TopicFileManager {
         }
     }
 
+    func deleteImportedTopic(at url: URL) throws {
+        let standardized = url.standardizedFileURL
+        let directoryPath = topicsDirectory.standardizedFileURL.path
+        guard standardized.path.hasPrefix(directoryPath) else {
+            throw TopicImportError.copyFailed
+        }
+        do {
+            try fileManager.removeItem(at: standardized)
+        } catch {
+            throw TopicImportError.copyFailed
+        }
+    }
+
     private func uniqueDestinationURL(for fileName: String) -> URL {
         let sanitized = sanitize(fileName: fileName)
         let baseURL = URL(fileURLWithPath: sanitized)

@@ -55,6 +55,19 @@ final class PracticeStore: ObservableObject {
         persist()
     }
 
+    func remove(entries: [VocabularyEntry]) {
+        let ids = Set(entries.map { $0.id })
+        var changed = false
+        for id in ids {
+            if states.removeValue(forKey: id) != nil {
+                changed = true
+            }
+        }
+        if changed {
+            persist()
+        }
+    }
+
     private func persist() {
         guard let encoded = try? encoder.encode(states) else { return }
         UserDefaults.standard.set(encoded, forKey: storageKey)

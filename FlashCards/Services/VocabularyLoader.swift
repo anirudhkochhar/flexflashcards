@@ -18,18 +18,28 @@ enum VocabularyLoader {
     static func loadTopics(userDirectory: URL? = nil) throws -> [VocabularyTopic] {
         let bundleURLs = csvFiles(inBundle: Bundle.main)
         let userURLs = userDirectory.map { csvFiles(inDirectory: $0) } ?? []
-        let urls = bundleURLs + userURLs
-        guard !urls.isEmpty else {
+        guard !(bundleURLs.isEmpty && userURLs.isEmpty) else {
             throw LoaderError.fileMissing
         }
 
         var topics: [VocabularyTopic] = []
-        for url in urls {
+        for url in bundleURLs {
             let fileName = url.deletingPathExtension().lastPathComponent
             do {
                 let entries = try parseEntries(from: url)
                 guard !entries.isEmpty else { continue }
-                topics.append(VocabularyTopic(name: fileName, entries: entries))
+                topics.append(VocabularyTopic(name: fileName, entries: entries, sourceURL: nil))
+            } catch {
+                throw LoaderError.parsingFailed(fileName: fileName)
+            }
+        }
+
+        for url in userURLs {
+            let fileName = url.deletingPathExtension().lastPathComponent
+            do {
+                let entries = try parseEntries(from: url)
+                guard !entries.isEmpty else { continue }
+                topics.append(VocabularyTopic(name: fileName, entries: entries, sourceURL: url))
             } catch {
                 throw LoaderError.parsingFailed(fileName: fileName)
             }
