@@ -57,6 +57,14 @@ final class TopicProgressStore: ObservableObject {
         }
     }
 
+    func setCompletionCount(_ count: Int, for topic: VocabularyTopic) {
+        var state = states[topic.id] ?? TopicProgressState()
+        state.completionCount = max(0, count)
+        state.completedRuns = Array(1...state.completionCount).reduce(into: Set<Int>()) { $0.insert($1) }
+        states[topic.id] = state
+        persist()
+    }
+
     private func normalizeState(for topic: VocabularyTopic, entries: [VocabularyEntry]) {
         let validIDs = Set(entries.map(\.id))
         if validIDs.isEmpty {

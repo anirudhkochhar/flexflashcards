@@ -216,12 +216,15 @@ private struct TopicDetailView: View {
     @EnvironmentObject private var topicProgressStore: TopicProgressStore
 
     @State private var selectedMode: TopicMode = .flashcards
+    @State private var showCompletionEditor = false
+    @State private var manualCompletionCount = ""
 
     var body: some View {
         VStack(spacing: 16) {
             TopicProgressSummary(topic: topic,
                                  state: topicProgressStore.state(for: topic, entries: topic.entries),
-                                 resetAction: restartIfNeeded)
+                                 resetAction: restartIfNeeded,
+                                 editAction: { presentCompletionEditor() })
             Picker("Mode", selection: $selectedMode) {
                 ForEach(TopicMode.allCases) { mode in
                     Text(mode.rawValue).tag(mode)
@@ -249,6 +252,13 @@ private struct TopicDetailView: View {
         }
         .padding()
         .navigationTitle(topic.displayName)
+        .sheet(isPresented: $showCompletionEditor) {
+            ManualCompletionEditor(isPresented: $showCompletionEditor,
+                                   initialValue: topicProgressStore.state(for: topic, entries: topic.entries).completionCount,
+                                   onSave: { newValue in
+                topicProgressStore.setCompletionCount(newValue, for: topic)
+            })
+        }
     }
 
     private func restartIfNeeded() {
@@ -257,12 +267,18 @@ private struct TopicDetailView: View {
               state.completedCardIDs.count >= topic.entries.count else { return }
         topicProgressStore.reset(topic: topic, incrementCompletion: true)
     }
+
+    private func presentCompletionEditor() {
+        manualCompletionCount = "\(topicProgressStore.state(for: topic, entries: topic.entries).completionCount)"
+        showCompletionEditor = true
+    }
 }
 
 private struct TopicProgressSummary: View {
     let topic: VocabularyTopic
     let state: TopicProgressState
     let resetAction: () -> Void
+    let editAction: () -> Void
 
     private var total: Int { topic.entries.count }
     private var completed: Int { min(state.completedCardIDs.count, total) }
@@ -292,16 +308,67 @@ private struct TopicProgressSummary: View {
             Text("Completed \(state.completionCount) time(s)")
                 .font(.caption)
                 .foregroundColor(.secondary)
+                .contextMenu {
+                    Button("Edit completion count") {
+                        editAction()
+                    }
+                }
 
             if isComplete {
                 Button("Restart topic") {
                     resetAction()
                 }
                 .buttonStyle(.borderedProminent)
+                .contextMenu {
+                    Button("Edit completion count") {
+                        editAction()
+                    }
+                }
+            } else {
+                Button("Edit completion count") {
+                    editAction()
+                }
+                .buttonStyle(.bordered)
             }
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 16).fill(Color(.secondarySystemBackground)))
+    }
+}
+
+private struct ManualCompletionEditor: View {
+    @Binding var isPresented: Bool
+    @State private var value: String
+    let onSave: (Int) -> Void
+
+    init(isPresented: Binding<Bool>, initialValue: Int, onSave: @escaping (Int) -> Void) {
+        self._isPresented = isPresented
+        self._value = State(initialValue: "\(initialValue)")
+        self.onSave = onSave
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Completion Count")) {
+                    TextField("Times completed", text: $value)
+                        .keyboardType(.numberPad)
+                }
+            }
+            .navigationTitle("Edit Progress")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { isPresented = false }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        let newValue = Int(value) ?? 0
+                        onSave(max(0, newValue))
+                        isPresented = false
+                    }
+                }
+            }
+        }
     }
 }
