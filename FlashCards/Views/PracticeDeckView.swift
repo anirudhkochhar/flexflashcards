@@ -67,8 +67,8 @@ private struct PracticeFlashcardSessionView: View {
     @State private var entriesSignature: String = ""
 
     var body: some View {
-        if let entry = currentEntry {
-            VStack(spacing: 16) {
+        VStack(spacing: 16) {
+            if let entry = currentEntry {
                 VStack(spacing: 12) {
                     Text(entry.german)
                         .font(.title)
@@ -78,14 +78,10 @@ private struct PracticeFlashcardSessionView: View {
                             .foregroundColor(.secondary)
                     }
                     Divider()
-                    if showAnswer {
-                        Text(entry.english)
-                            .font(.title2)
-                            .multilineTextAlignment(.center)
-                    } else {
-                        Text("Tap \"Show answer\" when ready")
-                            .foregroundColor(.secondary)
-                    }
+                    Text(showAnswer ? entry.english : "Tap \"Show answer\" when ready")
+                        .font(showAnswer ? .title2 : .body)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(showAnswer ? .primary : .secondary)
                 }
                 .padding()
                 .frame(maxWidth: .infinity)
@@ -112,12 +108,13 @@ private struct PracticeFlashcardSessionView: View {
                     }
                     .buttonStyle(.bordered)
                 }
+            } else {
+                Text("No practice cards available.")
+                    .foregroundColor(.secondary)
             }
-            .onChange(of: entriesSignatureValue) { _ in
-                syncDeck()
-            }
-            .onAppear { syncDeck() }
         }
+        .onChange(of: entriesSignatureValue) { _ in syncDeck() }
+        .onAppear { syncDeck() }
     }
 
     private var currentEntry: VocabularyEntry? {
