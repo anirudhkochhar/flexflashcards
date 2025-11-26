@@ -9,13 +9,42 @@ enum CardOrientation: String, CaseIterable, Identifiable {
 }
 
 struct FlashcardDeckView: View {
+    enum StudyMode: String, CaseIterable, Identifiable {
+        case flashcards = "Flashcards"
+        case multipleChoice = "Multiple Choice"
+
+        var id: String { rawValue }
+    }
+
     let entries: [VocabularyEntry]
     @ObservedObject var practiceStore: PracticeStore
 
+    @State private var mode: StudyMode = .flashcards
+
     var body: some View {
         NavigationView {
-            FlashcardSessionView(entries: entries, practiceStore: practiceStore)
-                .navigationTitle("Flashcards")
+            VStack(spacing: 16) {
+                Picker("Study Mode", selection: $mode) {
+                    ForEach(StudyMode.allCases) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding()
+
+                switch mode {
+                case .flashcards:
+                    FlashcardSessionView(entries: entries, practiceStore: practiceStore)
+                        .padding(.horizontal)
+                case .multipleChoice:
+                    MultipleChoiceSessionView(entries: entries,
+                                              practiceStore: practiceStore,
+                                              allowsPoolSelection: true)
+                        .padding(.horizontal)
+                }
+                Spacer(minLength: 0)
+            }
+            .navigationTitle("Flashcards")
         }
     }
 }
