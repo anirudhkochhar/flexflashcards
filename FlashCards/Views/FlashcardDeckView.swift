@@ -93,6 +93,17 @@ struct FlashcardSessionView: View {
                         .disabled(practiceStore.isActive(entry))
                         .buttonStyle(.bordered)
 
+                        if showAnswer && practiceStore.isActive(entry) {
+                            Button(action: {
+                                practiceStore.markWrong(for: entry)
+                                onCardComplete?(entry)
+                                nextCard()
+                            }) {
+                                Label("Still wrong", systemImage: "xmark.circle")
+                            }
+                            .buttonStyle(.bordered)
+                        }
+
                         Button(action: { primaryAction(for: entry) }) {
                             Label(showAnswer ? "Next" : "Show answer",
                                   systemImage: showAnswer ? "arrow.right.circle" : "eye")
