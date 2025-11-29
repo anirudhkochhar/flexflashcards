@@ -167,14 +167,11 @@ private struct FlashcardView: View {
             Text(promptTitle)
                 .font(.headline)
                 .foregroundColor(.secondary)
-            Text(questionText)
-                .font(.title)
+            AdaptiveText(text: questionText)
                 .fontWeight(.semibold)
-                .multilineTextAlignment(.center)
                 .padding()
             if showAnswer {
-                Text(answerText)
-                    .font(.title2)
+                AdaptiveText(text: answerText)
                     .fontWeight(.medium)
                     .multilineTextAlignment(.center)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
@@ -195,6 +192,26 @@ private struct FlashcardView: View {
                 .stroke(style: StrokeStyle(lineWidth: 2, dash: [6]))
                 .foregroundColor(.accentColor.opacity(0.4))
         )
+    }
+
+    private struct AdaptiveText: View {
+        let text: String
+
+        var body: some View {
+            Text(text)
+                .font(.system(size: fontSize(for: text)))
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.5)
+                .lineLimit(3)
+        }
+
+        private func fontSize(for text: String) -> CGFloat {
+            switch text.count {
+            case 0..<20: return 34
+            case 20..<40: return 28
+            default: return 24
+            }
+        }
     }
 
     private var questionText: String {
