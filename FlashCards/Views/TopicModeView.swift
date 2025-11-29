@@ -23,7 +23,7 @@ struct TopicModeView: View {
                         VStack(spacing: 12) {
                             Text("No topics found")
                                 .font(.title3)
-                            Text("Import CSV files or .zip archives to unlock topic practice.")
+                            Text("Import vocab files or .zip archives to unlock topic practice.")
                                 .multilineTextAlignment(.center)
                                 .foregroundColor(.secondary)
                         }

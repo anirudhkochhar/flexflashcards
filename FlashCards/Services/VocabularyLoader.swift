@@ -25,10 +25,11 @@ enum VocabularyLoader {
         var topics: [VocabularyTopic] = []
         for url in bundleURLs {
             let fileName = url.deletingPathExtension().lastPathComponent
+            let displayName = friendlyTopicName(from: fileName)
             do {
                 let entries = try parseEntries(from: url, sourcePrefix: fileName, isUserTopic: false)
                 guard !entries.isEmpty else { continue }
-                topics.append(VocabularyTopic(name: fileName, entries: entries, sourceURL: nil))
+                topics.append(VocabularyTopic(name: displayName, entries: entries, sourceURL: nil))
             } catch {
                 throw LoaderError.parsingFailed(fileName: fileName)
             }
@@ -36,11 +37,12 @@ enum VocabularyLoader {
 
         for url in userURLs {
             let fileName = url.deletingPathExtension().lastPathComponent
+            let displayName = friendlyTopicName(from: fileName)
             do {
                 let prefix = url.standardizedFileURL.path.replacingOccurrences(of: "/", with: "-")
                 let entries = try parseEntries(from: url, sourcePrefix: prefix, isUserTopic: true)
                 guard !entries.isEmpty else { continue }
-                topics.append(VocabularyTopic(name: fileName, entries: entries, sourceURL: url))
+                topics.append(VocabularyTopic(name: displayName, entries: entries, sourceURL: url))
             } catch {
                 throw LoaderError.parsingFailed(fileName: fileName)
             }
@@ -91,6 +93,15 @@ enum VocabularyLoader {
             urls.append(fileURL)
         }
         return urls
+    }
+
+    private static func friendlyTopicName(from rawName: String) -> String {
+        let tokens = rawName
+            .replacingOccurrences(of: "_", with: " ")
+            .split(separator: " ")
+            .filter { $0.caseInsensitiveCompare("csv") != .orderedSame }
+        let sanitized = tokens.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        return sanitized.isEmpty ? rawName : sanitized
     }
 }
 

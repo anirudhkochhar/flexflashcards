@@ -67,7 +67,13 @@ struct FlashcardSessionView: View {
                 if let entry = currentEntry {
                     FlashcardView(entry: entry, orientation: orientation, showAnswer: showAnswer)
                         .frame(maxWidth: .infinity, minHeight: 240)
-                        .onTapGesture { withAnimation { showAnswer.toggle() } }
+                        .onTapGesture {
+                            if showAnswer {
+                                primaryAction(for: entry)
+                            } else {
+                                withAnimation { showAnswer = true }
+                            }
+                        }
                         .animation(.easeInOut, value: showAnswer)
                         .gesture(
                             DragGesture(minimumDistance: 20)
