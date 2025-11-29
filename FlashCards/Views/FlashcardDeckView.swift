@@ -59,6 +59,8 @@ struct FlashcardSessionView: View {
     @State private var orientation: CardOrientation = .germanToEnglish
     @State private var remainingIndices: [Int] = []
     @State private var entriesSignature: String = ""
+    @State private var history: [Int] = []
+    @State private var forwardStack: [Int] = []
 
     var body: some View {
         VStack(spacing: 16) {
@@ -67,6 +69,16 @@ struct FlashcardSessionView: View {
                         .frame(maxWidth: .infinity, minHeight: 240)
                         .onTapGesture { withAnimation { showAnswer.toggle() } }
                         .animation(.easeInOut, value: showAnswer)
+                        .gesture(
+                            DragGesture(minimumDistance: 20)
+                                .onEnded { value in
+                                    if value.translation.width > 60 {
+                                        previousCard()
+                                    } else if value.translation.width < -60 {
+                                        primaryAction(for: entry)
+                                    }
+                                }
+                        )
 
                     HStack {
                         Button(action: { addToPractice(entry) }) {
@@ -118,6 +130,8 @@ struct FlashcardSessionView: View {
             remainingIndices = []
             showAnswer = false
             entriesSignature = ""
+            history = []
+            forwardStack = []
             return
         }
         let newSignature = entriesSignatureValue
@@ -126,18 +140,36 @@ struct FlashcardSessionView: View {
             remainingIndices = Array(entries.indices).shuffled()
             currentIndex = remainingIndices.isEmpty ? nil : remainingIndices.removeFirst()
             showAnswer = false
+            history = []
+            forwardStack = []
         }
     }
 
     private func nextCard() {
+        if let forward = forwardStack.popLast() {
+            if let current = currentIndex {
+                history.append(current)
+            }
+            currentIndex = forward
+            showAnswer = false
+            return
+        }
         guard !entries.isEmpty else {
             currentIndex = nil
             return
+        }
+        if let current = currentIndex {
+            history.append(current)
+            let maxHistory = 50
+            if history.count > maxHistory {
+                history.removeFirst(history.count - maxHistory)
+            }
         }
         if remainingIndices.isEmpty {
             remainingIndices = Array(entries.indices).shuffled()
         }
         currentIndex = remainingIndices.removeFirst()
+        forwardStack.removeAll()
         showAnswer = false
     }
 
@@ -154,6 +186,15 @@ struct FlashcardSessionView: View {
                 showAnswer = true
             }
         }
+    }
+
+    private func previousCard() {
+        guard let previous = history.popLast() else { return }
+        if let current = currentIndex {
+            forwardStack.append(current)
+        }
+        currentIndex = previous
+        showAnswer = false
     }
 }
 
