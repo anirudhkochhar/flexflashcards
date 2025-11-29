@@ -204,7 +204,7 @@ struct FlashcardSessionView: View {
     }
 }
 
-private struct FlashcardView: View {
+struct FlashcardView: View {
     let entry: VocabularyEntry
     let orientation: CardOrientation
     let showAnswer: Bool

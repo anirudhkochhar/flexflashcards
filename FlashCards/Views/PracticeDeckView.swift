@@ -69,24 +69,18 @@ private struct PracticeFlashcardSessionView: View {
     var body: some View {
         VStack(spacing: 16) {
             if let entry = currentEntry {
-                VStack(spacing: 12) {
-                    Text(entry.german)
-                        .font(.title)
-                        .fontWeight(.semibold)
-                    if let plural = entry.plural {
-                        Text(plural)
-                            .foregroundColor(.secondary)
+                FlashcardView(entry: entry,
+                              orientation: CardOrientation.germanToEnglish,
+                              showAnswer: showAnswer)
+                    .frame(maxWidth: CGFloat.infinity, minHeight: 220)
+                    .onTapGesture {
+                        if showAnswer {
+                            markCorrect(entry)
+                        } else {
+                            withAnimation { showAnswer = true }
+                        }
                     }
-                    Divider()
-                    Text(showAnswer ? entry.english : "Tap \"Show answer\" when ready")
-                        .font(showAnswer ? .title2 : .body)
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(showAnswer ? .primary : .secondary)
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(RoundedRectangle(cornerRadius: 18).fill(Color(.systemBackground)))
-                .shadow(radius: 4)
+                    .animation(Animation.easeInOut, value: showAnswer)
 
                 Text(progressLabel(for: entry))
                     .font(.footnote)
