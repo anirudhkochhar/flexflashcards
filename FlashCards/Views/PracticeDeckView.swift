@@ -27,9 +27,15 @@ struct PracticeDeckView: View {
                 }
                 .pickerStyle(.segmented)
 
-                Text("Practice cards: \(practiceEntries.count)")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                HStack {
+                    Text("Practice cards: \(practiceEntries.count)")
+                        .font(.headline)
+                    Spacer()
+                    NavigationLink("View list") {
+                        PracticeListView(entries: practiceEntries, practiceStore: practiceStore)
+                    }
+                    .buttonStyle(.bordered)
+                }
 
                 if practiceEntries.isEmpty {
                     VStack(spacing: 12) {
@@ -177,5 +183,31 @@ private struct PracticeMultipleChoiceSessionView: View {
         MultipleChoiceSessionView(entries: entries,
                                   practiceStore: practiceStore,
                                   allowsPoolSelection: false)
+    }
+}
+
+private struct PracticeListView: View {
+    let entries: [VocabularyEntry]
+    @ObservedObject var practiceStore: PracticeStore
+
+    var body: some View {
+        List(entries) { entry in
+            VStack(alignment: .leading, spacing: 4) {
+                Text(entry.german)
+                    .font(.headline)
+                Text(entry.english)
+                    .foregroundColor(.secondary)
+                Text(streakText(for: entry))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 4)
+        }
+        .navigationTitle("Practice List")
+    }
+
+    private func streakText(for entry: VocabularyEntry) -> String {
+        let state = practiceStore.states[entry.id] ?? .empty
+        return "Correct streak: \(state.correctStreak)/\(practiceStore.goalStreak)"
     }
 }
