@@ -65,7 +65,10 @@ struct FlashcardSessionView: View {
     var body: some View {
         VStack(spacing: 16) {
                 if let entry = currentEntry {
-                    FlashcardView(entry: entry, orientation: orientation, showAnswer: showAnswer)
+                    FlashcardView(entry: entry,
+                                  orientation: orientation,
+                                  showAnswer: showAnswer,
+                                  practiceStore: practiceStore)
                         .frame(maxWidth: .infinity, minHeight: 240)
                         .onTapGesture {
                             if showAnswer {
@@ -219,6 +222,7 @@ struct FlashcardView: View {
     let entry: VocabularyEntry
     let orientation: CardOrientation
     let showAnswer: Bool
+    var practiceStore: PracticeStore?
 
     var body: some View {
         VStack(spacing: 12) {
@@ -234,11 +238,13 @@ struct FlashcardView: View {
                     .multilineTextAlignment(.center)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
-            if showAnswer, orientation == .englishToGerman, let plural = entry.plural {
+            if showAnswer, let plural = entry.plural {
                 Text("Plural: \(plural)")
                     .foregroundColor(.secondary)
-            } else if showAnswer, orientation == .germanToEnglish, let plural = entry.plural {
-                Text("Plural: \(plural)")
+            }
+            if showAnswer, let practiceStore = practiceStore, practiceStore.isActive(entry) {
+                Text(streakText(for: entry, in: practiceStore))
+                    .font(.caption)
                     .foregroundColor(.secondary)
             }
         }
@@ -250,6 +256,11 @@ struct FlashcardView: View {
                 .stroke(style: StrokeStyle(lineWidth: 2, dash: [6]))
                 .foregroundColor(.accentColor.opacity(0.4))
         )
+    }
+
+    private func streakText(for entry: VocabularyEntry, in store: PracticeStore) -> String {
+        let state = store.states[entry.id] ?? .empty
+        return "Practice streak: \(state.correctStreak)/\(store.goalStreak)"
     }
 
     private struct AdaptiveText: View {
