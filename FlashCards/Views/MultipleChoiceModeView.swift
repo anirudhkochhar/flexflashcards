@@ -79,10 +79,16 @@ struct MultipleChoiceSessionView: View {
                         .disabled(selectedAnswer != nil)
                     }
 
-                    if let feedback = feedback {
-                        Text(feedback)
-                            .font(.body)
-                            .foregroundColor(feedbackColor)
+                    if let feedback = feedback, let entry = currentQuestion?.entry {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(feedback)
+                                .font(.body)
+                                .foregroundColor(feedbackColor)
+                            let state = practiceStore.states[entry.id] ?? .empty
+                            Text("Correct streak: \(state.correctStreak)/\(practiceStore.goalStreak)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
 
                     Button("Next question") {
