@@ -5,12 +5,14 @@ struct FlashCardsApp: App {
     @StateObject private var vocabularyStore = VocabularyStore()
     @StateObject private var practiceStore = PracticeStore(storageKey: "flashcard-practice", requiredCorrectStreak: 5)
     @StateObject private var topicProgressStore = TopicProgressStore()
+    @StateObject private var topicSessionStore = TopicSessionStore()
 
     var body: some Scene {
         WindowGroup {
             ContentView(practiceStore: practiceStore)
                 .environmentObject(vocabularyStore)
                 .environmentObject(topicProgressStore)
+                .environmentObject(topicSessionStore)
         }
     }
 }

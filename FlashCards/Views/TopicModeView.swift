@@ -5,6 +5,7 @@ struct TopicModeView: View {
     @EnvironmentObject private var vocabularyStore: VocabularyStore
     @ObservedObject var practiceStore: PracticeStore
     @EnvironmentObject private var topicProgressStore: TopicProgressStore
+    @EnvironmentObject private var topicSessionStore: TopicSessionStore
 
     @State private var showImporter = false
     @State private var isImporting = false
@@ -179,6 +180,7 @@ struct TopicModeView: View {
             try vocabularyStore.deleteTopic(topic)
             practiceStore.remove(entries: topic.entries)
             topicProgressStore.clear(topic: topic)
+            topicSessionStore.clear(for: topic.id)
             topicPendingDeletion = nil
             activeAlert = .success("\(topic.displayName) deleted.")
         } catch {
@@ -214,6 +216,7 @@ private struct TopicDetailView: View {
     let topic: VocabularyTopic
     @ObservedObject var practiceStore: PracticeStore
     @EnvironmentObject private var topicProgressStore: TopicProgressStore
+    @EnvironmentObject private var topicSessionStore: TopicSessionStore
 
     @State private var selectedMode: TopicMode = .flashcards
     @State private var showCompletionEditor = false
@@ -238,7 +241,9 @@ private struct TopicDetailView: View {
                                      practiceStore: practiceStore,
                                      onCardComplete: { entry in
                     topicProgressStore.markCompleted(entry, in: topic)
-                })
+                },
+                                     sessionKey: topic.id,
+                                     sessionStore: topicSessionStore)
             case .multipleChoice:
                 MultipleChoiceSessionView(entries: topic.entries,
                                           practiceStore: practiceStore,
@@ -266,6 +271,7 @@ private struct TopicDetailView: View {
         guard topic.entries.count > 0,
               state.completedCardIDs.count >= topic.entries.count else { return }
         topicProgressStore.reset(topic: topic, incrementCompletion: true)
+        topicSessionStore.clear(for: topic.id)
     }
 
     private func presentCompletionEditor() {

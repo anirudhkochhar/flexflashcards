@@ -49,71 +49,72 @@ struct FlashcardDeckView: View {
     }
 }
 
+
 struct FlashcardSessionView: View {
     let entries: [VocabularyEntry]
     @ObservedObject var practiceStore: PracticeStore
     var onCardComplete: ((VocabularyEntry) -> Void)? = nil
+    var sessionKey: String? = nil
+    var sessionStore: TopicSessionStore? = nil
 
-    @State private var currentIndex: Int?
-    @State private var showAnswer: Bool = false
+    @State private var showAnswer = false
     @State private var orientation: CardOrientation = .germanToEnglish
-    @State private var remainingIndices: [Int] = []
+    @State private var order: [Int] = []
+    @State private var position: Int = 0
     @State private var entriesSignature: String = ""
-    @State private var history: [Int] = []
-    @State private var forwardStack: [Int] = []
 
     var body: some View {
         VStack(spacing: 16) {
-                if let entry = currentEntry {
-                    FlashcardView(entry: entry,
-                                  orientation: orientation,
-                                  showAnswer: showAnswer,
-                                  practiceStore: practiceStore)
-                        .frame(maxWidth: .infinity, minHeight: 240)
-                        .onTapGesture {
-                            if showAnswer {
-                                primaryAction(for: entry)
-                            } else {
-                                withAnimation { showAnswer = true }
-                            }
+            if let entry = currentEntry {
+                FlashcardView(entry: entry,
+                              orientation: orientation,
+                              showAnswer: showAnswer,
+                              practiceStore: practiceStore)
+                    .frame(maxWidth: .infinity, minHeight: 240)
+                    .onTapGesture {
+                        if showAnswer {
+                            primaryAction(for: entry)
+                        } else {
+                            withAnimation { showAnswer = true }
                         }
-                        .animation(.easeInOut, value: showAnswer)
-                        .gesture(
-                            DragGesture(minimumDistance: 20)
-                                .onEnded { value in
-                                    if value.translation.width > 60 {
-                                        previousCard()
-                                    } else if value.translation.width < -60 {
-                                        primaryAction(for: entry)
-                                    }
-                                }
-                        )
-
-                    HStack {
-                        Button(action: { addToPractice(entry) }) {
-                            Label(practiceStore.isActive(entry) ? "Already Practicing" : "I got it wrong", systemImage: "exclamationmark.circle")
-                        }
-                        .disabled(practiceStore.isActive(entry))
-                        .buttonStyle(.bordered)
-
-                        if showAnswer && practiceStore.isActive(entry) {
-                            Button(action: {
-                                practiceStore.markWrong(for: entry)
-                                onCardComplete?(entry)
-                                nextCard()
-                            }) {
-                                Label("Still wrong", systemImage: "xmark.circle")
-                            }
-                            .buttonStyle(.bordered)
-                        }
-
-                        Button(action: { primaryAction(for: entry) }) {
-                            Label(showAnswer ? "Next" : "Show answer",
-                                  systemImage: showAnswer ? "arrow.right.circle" : "eye")
-                        }
-                        .buttonStyle(.borderedProminent)
                     }
-                } else {
+                    .animation(.easeInOut, value: showAnswer)
+                    .gesture(
+                        DragGesture(minimumDistance: 20)
+                            .onEnded { value in
+                                if value.translation.width > 60 {
+                                    previousCard()
+                                } else if value.translation.width < -60 {
+                                    primaryAction(for: entry)
+                                }
+                            }
+                    )
+
+                HStack {
+                    Button(action: { addToPractice(entry) }) {
+                        Label(practiceStore.isActive(entry) ? "Already Practicing" : "I got it wrong", systemImage: "exclamationmark.circle")
+                    }
+                    .disabled(practiceStore.isActive(entry))
+                    .buttonStyle(.bordered)
+
+                    if showAnswer && practiceStore.isActive(entry) {
+                        Button(action: {
+                            practiceStore.markWrong(for: entry)
+                            onCardComplete?(entry)
+                            nextCard()
+                        }) {
+                            Label("Still wrong", systemImage: "xmark.circle")
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    Button(action: { primaryAction(for: entry) }) {
+                        Label(showAnswer ? "Next" : "Show answer",
+                              systemImage: showAnswer ? "arrow.right.circle" : "eye")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            } else {
                 Text("No cards to show.")
                     .foregroundColor(.secondary)
             }
@@ -129,10 +130,8 @@ struct FlashcardSessionView: View {
             Spacer()
         }
         .padding()
-        .onAppear { syncDeckWithEntries(force: true) }
-        .onChange(of: entriesSignatureValue) { _ in
-            syncDeckWithEntries(force: true)
-        }
+        .onAppear { loadOrSyncOrder(force: true) }
+        .onChange(of: entriesSignatureValue) { _ in loadOrSyncOrder(force: true) }
     }
 
     private var entriesSignatureValue: String {
@@ -140,57 +139,76 @@ struct FlashcardSessionView: View {
     }
 
     private var currentEntry: VocabularyEntry? {
-        guard let idx = currentIndex, entries.indices.contains(idx) else { return nil }
+        guard !order.isEmpty else { return nil }
+        let idx = order[position % order.count]
+        guard entries.indices.contains(idx) else { return nil }
         return entries[idx]
     }
 
-    private func syncDeckWithEntries(force: Bool = false) {
-        if entries.isEmpty {
-            currentIndex = nil
-            remainingIndices = []
+    private var shouldPersistOrder: Bool {
+        sessionKey != nil && sessionStore != nil
+    }
+
+    private func loadOrSyncOrder(force: Bool) {
+        guard !entries.isEmpty else {
+            order = []
+            position = 0
             showAnswer = false
             entriesSignature = ""
-            history = []
-            forwardStack = []
+            saveSnapshot()
             return
         }
         let newSignature = entriesSignatureValue
-        if force || newSignature != entriesSignature || currentIndex == nil {
+        if force || newSignature != entriesSignature || order.isEmpty {
             entriesSignature = newSignature
-            remainingIndices = Array(entries.indices).shuffled()
-            currentIndex = remainingIndices.isEmpty ? nil : remainingIndices.removeFirst()
+            if shouldPersistOrder,
+               let key = sessionKey,
+               let store = sessionStore,
+               let snapshot = store.snapshot(for: key),
+               applySnapshot(snapshot) {
+                return
+            }
+            order = entries.indices.shuffled()
+            position = 0
             showAnswer = false
-            history = []
-            forwardStack = []
+            saveSnapshot()
+        } else if position >= order.count {
+            position = 0
+            showAnswer = false
         }
     }
 
-    private func nextCard() {
-        if let forward = forwardStack.popLast() {
-            if let current = currentIndex {
-                history.append(current)
-            }
-            currentIndex = forward
-            showAnswer = false
-            return
-        }
-        guard !entries.isEmpty else {
-            currentIndex = nil
-            return
-        }
-        if let current = currentIndex {
-            history.append(current)
-            let maxHistory = 50
-            if history.count > maxHistory {
-                history.removeFirst(history.count - maxHistory)
-            }
-        }
-        if remainingIndices.isEmpty {
-            remainingIndices = Array(entries.indices).shuffled()
-        }
-        currentIndex = remainingIndices.removeFirst()
-        forwardStack.removeAll()
+    private func applySnapshot(_ snapshot: FlashcardRunSnapshot?) -> Bool {
+        guard let snapshot = snapshot else { return false }
+        let idToIndex = Dictionary(uniqueKeysWithValues: entries.enumerated().map { ($0.element.id, $0.offset) })
+        let mapped = snapshot.orderIDs.compactMap { idToIndex[$0] }
+        guard !mapped.isEmpty else { return false }
+        order = mapped
+        position = min(max(0, snapshot.position), max(0, order.count - 1))
         showAnswer = false
+        return true
+    }
+
+    private func nextCard() {
+        guard !order.isEmpty else { return }
+        position += 1
+        if position >= order.count {
+            if shouldPersistOrder {
+                position = 0
+            } else {
+                order = entries.indices.shuffled()
+                position = 0
+            }
+        }
+        showAnswer = false
+        saveSnapshot()
+    }
+
+    private func previousCard() {
+        guard !order.isEmpty else { return }
+        position = (position - 1 + order.count) % order.count
+        showAnswer = false
+        saveSnapshot()
     }
 
     private func addToPractice(_ entry: VocabularyEntry) {
@@ -202,19 +220,18 @@ struct FlashcardSessionView: View {
             onCardComplete?(entry)
             nextCard()
         } else {
-            withAnimation {
-                showAnswer = true
-            }
+            withAnimation { showAnswer = true }
         }
     }
 
-    private func previousCard() {
-        guard let previous = history.popLast() else { return }
-        if let current = currentIndex {
-            forwardStack.append(current)
-        }
-        currentIndex = previous
-        showAnswer = false
+    private func saveSnapshot() {
+        guard shouldPersistOrder,
+              let key = sessionKey,
+              let store = sessionStore,
+              !order.isEmpty else { return }
+        let ids = order.compactMap { entries.indices.contains($0) ? entries[$0].id : nil }
+        let snapshot = FlashcardRunSnapshot(orderIDs: ids, position: position)
+        store.save(snapshot: snapshot, for: key)
     }
 }
 

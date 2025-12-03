@@ -23,6 +23,7 @@
 	1BFC39432B1FFC6F00F6A019 /* TopicModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */; };
 	1BFC39482B208C5F00F6A019 /* TopicProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */; };
 		1BFC39462B20047800F6A019 /* TopicFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39472B20047800F6A019 /* TopicFileManager.swift */; };
+		1BFC394A2B21325100F6A019 /* TopicSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 	1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicModeView.swift; sourceTree = "<group>"; };
 	1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicProgressStore.swift; sourceTree = "<group>"; };
 		1BFC39472B20047800F6A019 /* TopicFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicFileManager.swift; sourceTree = "<group>"; };
+		1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicSessionStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +107,7 @@
 			1BFC39142B1FF8D200F6A019 /* VocabularyLoader.swift */,
 			1BFC39152B1FF8D200F6A019 /* PracticeStore.swift */,
 			1BFC39472B20047800F6A019 /* TopicFileManager.swift */,
+			1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */,
 			1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */,
 			);
 			path = Services;
@@ -212,6 +215,7 @@
 				1BFC39332B1FF8D200F6A019 /* PracticeCardState.swift in Sources */,
 				1BFC39352B1FF8D200F6A019 /* PracticeStore.swift in Sources */,
 				1BFC39462B20047800F6A019 /* TopicFileManager.swift in Sources */,
+				1BFC394A2B21325100F6A019 /* TopicSessionStore.swift in Sources */,
 			1BFC39422B1FFC6F00F6A019 /* VocabularyTopic.swift in Sources */,
 			1BFC39482B208C5F00F6A019 /* TopicProgressStore.swift in Sources */,
 				1BFC39322B1FF8D200F6A019 /* VocabularyEntry.swift in Sources */,
