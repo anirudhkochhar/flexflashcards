@@ -57,6 +57,11 @@ final class TopicProgressStore: ObservableObject {
         }
     }
 
+    func load(states newStates: [String: TopicProgressState]) {
+        states = newStates
+        persist()
+    }
+
     func setCompletionCount(_ count: Int, for topic: VocabularyTopic) {
         var state = states[topic.id] ?? TopicProgressState()
         state.completionCount = max(0, count)

@@ -6,11 +6,13 @@ struct TopicModeView: View {
     @ObservedObject var practiceStore: PracticeStore
     @EnvironmentObject private var topicProgressStore: TopicProgressStore
     @EnvironmentObject private var topicSessionStore: TopicSessionStore
+    @EnvironmentObject private var autoSaveCoordinator: AutoSaveCoordinator
 
     @State private var showImporter = false
     @State private var isImporting = false
     @State private var activeAlert: ImportAlert?
     @State private var topicPendingDeletion: VocabularyTopic?
+    @State private var stateAlert: StateAlert?
 
     private var topics: [VocabularyTopic] {
         vocabularyStore.topics
@@ -59,6 +61,15 @@ struct TopicModeView: View {
             }
             .navigationTitle("Topics")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Menu {
+                        Button("Save state", action: saveAppState)
+                        Button("Load state", action: loadAppState)
+                        Toggle("Auto-save on change", isOn: $autoSaveCoordinator.isEnabled)
+                    } label: {
+                        Label("State", systemImage: "externaldrive")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: { showImporter = true }) {
                         Label("Import", systemImage: "square.and.arrow.down")
@@ -111,6 +122,11 @@ struct TopicModeView: View {
                 if let topic = topicPendingDeletion {
                     Text("This removes \(topic.displayName) and clears any related practice data.")
                 }
+            }
+            .alert(item: $stateAlert) { alert in
+                Alert(title: Text(alert.title),
+                      message: Text(alert.message),
+                      dismissButton: .default(Text("OK")))
             }
         }
     }
@@ -190,6 +206,29 @@ struct TopicModeView: View {
         }
     }
 
+    private func saveAppState() {
+        do {
+            _ = try AppStateSaver.save(practiceStore: practiceStore,
+                                       topicProgressStore: topicProgressStore,
+                                       topicSessionStore: topicSessionStore)
+            stateAlert = .success("State saved to Files ▸ On My iPhone ▸ FlashCardsState.")
+        } catch {
+            stateAlert = .failure(error.localizedDescription)
+        }
+    }
+
+    private func loadAppState() {
+        do {
+            let snapshot = try AppStateSaver.load()
+            practiceStore.load(states: snapshot.practiceStates)
+            topicProgressStore.load(states: snapshot.topicProgressStates)
+            topicSessionStore.load(snapshots: snapshot.topicSessionSnapshots)
+            stateAlert = .success("State loaded successfully.")
+        } catch {
+            stateAlert = .failure(error.localizedDescription)
+        }
+    }
+
     private enum ImportAlert: Identifiable {
         case success(String)
         case failure(String)
@@ -200,6 +239,29 @@ struct TopicModeView: View {
                 return "success-\(message)"
             case .failure(let message):
                 return "failure-\(message)"
+            }
+        }
+    }
+
+    private enum StateAlert: Identifiable {
+        case success(String)
+        case failure(String)
+
+        var id: String { UUID().uuidString }
+        var title: String {
+            switch self {
+            case .success:
+                return "State Update"
+            case .failure:
+                return "State Error"
+            }
+        }
+        var message: String {
+            switch self {
+            case .success(let message):
+                return message
+            case .failure(let message):
+                return message
             }
         }
     }

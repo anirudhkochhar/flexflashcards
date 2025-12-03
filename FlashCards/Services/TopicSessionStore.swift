@@ -36,6 +36,11 @@ final class TopicSessionStore: ObservableObject {
         }
     }
 
+    func load(snapshots newSnapshots: [String: FlashcardRunSnapshot]) {
+        snapshots = newSnapshots
+        persist()
+    }
+
     private func persist() {
         guard let data = try? encoder.encode(snapshots) else { return }
         UserDefaults.standard.set(data, forKey: storageKey)

@@ -1,11 +1,30 @@
 import SwiftUI
+import Combine
 
 @main
 struct FlashCardsApp: App {
-    @StateObject private var vocabularyStore = VocabularyStore()
-    @StateObject private var practiceStore = PracticeStore(storageKey: "flashcard-practice", requiredCorrectStreak: 5)
-    @StateObject private var topicProgressStore = TopicProgressStore()
-    @StateObject private var topicSessionStore = TopicSessionStore()
+    @StateObject private var vocabularyStore: VocabularyStore
+    @StateObject private var practiceStore: PracticeStore
+    @StateObject private var topicProgressStore: TopicProgressStore
+    @StateObject private var topicSessionStore: TopicSessionStore
+    @StateObject private var autoSaveCoordinator: AutoSaveCoordinator
+
+    init() {
+        let vocabStore = VocabularyStore()
+        let practiceStore = PracticeStore(storageKey: "flashcard-practice", requiredCorrectStreak: 5)
+        let progressStore = TopicProgressStore()
+        let sessionStore = TopicSessionStore()
+        let autoSave = AutoSaveCoordinator()
+        autoSave.bind(practiceStore: practiceStore,
+                      topicProgressStore: progressStore,
+                      topicSessionStore: sessionStore)
+
+        _vocabularyStore = StateObject(wrappedValue: vocabStore)
+        _practiceStore = StateObject(wrappedValue: practiceStore)
+        _topicProgressStore = StateObject(wrappedValue: progressStore)
+        _topicSessionStore = StateObject(wrappedValue: sessionStore)
+        _autoSaveCoordinator = StateObject(wrappedValue: autoSave)
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -13,6 +32,7 @@ struct FlashCardsApp: App {
                 .environmentObject(vocabularyStore)
                 .environmentObject(topicProgressStore)
                 .environmentObject(topicSessionStore)
+                .environmentObject(autoSaveCoordinator)
         }
     }
 }

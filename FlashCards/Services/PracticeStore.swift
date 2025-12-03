@@ -68,6 +68,12 @@ final class PracticeStore: ObservableObject {
         }
     }
 
+    func load(states newStates: [String: PracticeCardState]) {
+        states = newStates
+        persist()
+        objectWillChange.send()
+    }
+
     private func persist() {
         guard let encoded = try? encoder.encode(states) else { return }
         UserDefaults.standard.set(encoded, forKey: storageKey)
