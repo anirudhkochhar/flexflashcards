@@ -8,7 +8,8 @@ struct AppStateSnapshot: Codable {
 }
 
 enum AppStateSaver {
-    private static let stateFolderName = "FlashCardsState"
+    private static let stateFolderNameKey = "state-folder-name"
+    private static let defaultFolderName = "FlashCardsState"
     private static let stateFileName = "state.json"
 
     static func save(practiceStore: PracticeStore,
@@ -22,9 +23,7 @@ enum AppStateSaver {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(snapshot)
 
-        let fileManager = FileManager.default
-        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let folderURL = documentsURL.appendingPathComponent(stateFolderName, isDirectory: true)
+        let folderURL = makeStateFolderURL()
         if fileManager.fileExists(atPath: folderURL.path) {
             try fileManager.removeItem(at: folderURL)
         }
@@ -35,13 +34,27 @@ enum AppStateSaver {
     }
 
     static func load() throws -> AppStateSnapshot {
-        let fileManager = FileManager.default
-        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = documentsURL
-            .appendingPathComponent(stateFolderName, isDirectory: true)
+        let fileURL = makeStateFolderURL()
             .appendingPathComponent(stateFileName)
         let data = try Data(contentsOf: fileURL)
         let decoder = JSONDecoder()
         return try decoder.decode(AppStateSnapshot.self, from: data)
+    }
+
+    static var stateFolderName: String {
+        UserDefaults.standard.string(forKey: stateFolderNameKey) ?? defaultFolderName
+    }
+
+    static func updateStateFolderName(_ name: String) {
+        let sanitized = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let value = sanitized.isEmpty ? defaultFolderName : sanitized
+        UserDefaults.standard.set(value, forKey: stateFolderNameKey)
+    }
+
+    private static var fileManager: FileManager { FileManager.default }
+
+    private static func makeStateFolderURL() -> URL {
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        return documentsURL.appendingPathComponent(stateFolderName, isDirectory: true)
     }
 }

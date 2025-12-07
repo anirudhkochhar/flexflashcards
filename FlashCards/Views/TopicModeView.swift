@@ -13,6 +13,8 @@ struct TopicModeView: View {
     @State private var activeAlert: ImportAlert?
     @State private var topicPendingDeletion: VocabularyTopic?
     @State private var stateAlert: StateAlert?
+    @State private var showFolderEditor = false
+    @State private var folderNameDraft = AppStateSaver.stateFolderName
 
     private var topics: [VocabularyTopic] {
         vocabularyStore.topics
@@ -63,9 +65,18 @@ struct TopicModeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
-                        Button("Save state", action: saveAppState)
-                        Button("Load state", action: loadAppState)
-                        Toggle("Auto-save on change", isOn: $autoSaveCoordinator.isEnabled)
+                        Section {
+                            Button("Save state", action: saveAppState)
+                            Button("Load state", action: loadAppState)
+                            Toggle("Auto-save on change", isOn: $autoSaveCoordinator.isEnabled)
+                        }
+                        Button("Change save folder…") {
+                            folderNameDraft = AppStateSaver.stateFolderName
+                            showFolderEditor = true
+                        }
+                        Button("Open in Files") {
+                            openInFiles()
+                        }
                     } label: {
                         Label("State", systemImage: "externaldrive")
                     }
@@ -127,6 +138,34 @@ struct TopicModeView: View {
                 Alert(title: Text(alert.title),
                       message: Text(alert.message),
                       dismissButton: .default(Text("OK")))
+            }
+        }
+        .sheet(isPresented: $showFolderEditor) {
+            NavigationView {
+                Form {
+                    Section(header: Text("Save folder name")) {
+                        TextField("Folder name", text: $folderNameDraft)
+                            .autocapitalization(.none)
+                    }
+                    Section {
+                        Text("Current location: Files ▸ On My iPhone ▸ \(folderNameDraft.isEmpty ? AppStateSaver.stateFolderName : folderNameDraft)")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .navigationTitle("Save Folder")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { showFolderEditor = false }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            AppStateSaver.updateStateFolderName(folderNameDraft)
+                            showFolderEditor = false
+                            stateAlert = .success("Folder set to \(AppStateSaver.stateFolderName).")
+                        }
+                    }
+                }
             }
         }
     }
@@ -206,6 +245,16 @@ struct TopicModeView: View {
         }
     }
 
+
+    private func openInFiles() {
+        let folderURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appendingPathComponent(AppStateSaver.stateFolderName, isDirectory: true)
+        UIApplication.shared.open(folderURL, options: [:], completionHandler: { success in
+            if !success {
+                stateAlert = .failure("Unable to open Files.")
+            }
+        })
+    }
     private func saveAppState() {
         do {
             _ = try AppStateSaver.save(practiceStore: practiceStore,
@@ -247,7 +296,7 @@ struct TopicModeView: View {
         case success(String)
         case failure(String)
 
-        var id: String { UUID().uuidString }
+        var id: String { message }
         var title: String {
             switch self {
             case .success:

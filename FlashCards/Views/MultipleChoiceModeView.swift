@@ -56,16 +56,12 @@ struct MultipleChoiceSessionView: View {
                         .labelStyle(.iconOnly)
                     }
 
-                    Text(question.prompt)
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.leading)
+                    FlexiblePromptText(text: question.prompt)
 
                     ForEach(question.options, id: \.self) { option in
                         Button(action: { select(option, for: question) }) {
                             HStack {
-                                Text(option)
-                                    .multilineTextAlignment(.leading)
+                                FlexibleOptionText(text: option)
                                 Spacer()
                                 if selectedAnswer == option {
                                     Image(systemName: option == question.answer ? "checkmark.circle.fill" : "xmark.circle")
@@ -192,9 +188,35 @@ struct MultipleChoiceSessionView: View {
         }
     }
 
-    private func popNextIndex() -> Int? {
-        guard !remainingIndices.isEmpty else { return nil }
-        return remainingIndices.removeFirst()
+private func popNextIndex() -> Int? {
+    guard !remainingIndices.isEmpty else { return nil }
+    return remainingIndices.removeFirst()
+}
+}
+
+private struct FlexiblePromptText: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.title2.weight(.semibold))
+            .lineLimit(6)
+            .minimumScaleFactor(0.8)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private struct FlexibleOptionText: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.body)
+            .lineLimit(4)
+            .minimumScaleFactor(0.8)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
