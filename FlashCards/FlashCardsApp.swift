@@ -7,23 +7,23 @@ struct FlashCardsApp: App {
     @StateObject private var practiceStore: PracticeStore
     @StateObject private var topicProgressStore: TopicProgressStore
     @StateObject private var topicSessionStore: TopicSessionStore
-    @StateObject private var autoSaveCoordinator: AutoSaveCoordinator
+    @StateObject private var statePersistenceCoordinator: StatePersistenceCoordinator
 
     init() {
         let vocabStore = VocabularyStore()
         let practiceStore = PracticeStore(storageKey: "flashcard-practice", requiredCorrectStreak: 5)
         let progressStore = TopicProgressStore()
         let sessionStore = TopicSessionStore()
-        let autoSave = AutoSaveCoordinator()
-        autoSave.bind(practiceStore: practiceStore,
-                      topicProgressStore: progressStore,
-                      topicSessionStore: sessionStore)
+        let persistenceCoordinator = StatePersistenceCoordinator()
+        persistenceCoordinator.bind(practiceStore: practiceStore,
+                                    topicProgressStore: progressStore,
+                                    vocabularyStore: vocabStore)
 
         _vocabularyStore = StateObject(wrappedValue: vocabStore)
         _practiceStore = StateObject(wrappedValue: practiceStore)
         _topicProgressStore = StateObject(wrappedValue: progressStore)
         _topicSessionStore = StateObject(wrappedValue: sessionStore)
-        _autoSaveCoordinator = StateObject(wrappedValue: autoSave)
+        _statePersistenceCoordinator = StateObject(wrappedValue: persistenceCoordinator)
     }
 
     var body: some Scene {
@@ -32,7 +32,7 @@ struct FlashCardsApp: App {
                 .environmentObject(vocabularyStore)
                 .environmentObject(topicProgressStore)
                 .environmentObject(topicSessionStore)
-                .environmentObject(autoSaveCoordinator)
+                .environmentObject(statePersistenceCoordinator)
         }
     }
 }
@@ -78,6 +78,11 @@ final class VocabularyStore: ObservableObject {
     func deleteTopic(_ topic: VocabularyTopic) throws {
         guard let sourceURL = topic.sourceURL else { return }
         try topicFileManager.deleteImportedTopic(at: sourceURL)
+        loadVocabulary()
+    }
+
+    func restoreUserTopics(from snapshots: [TopicDataSnapshot]) throws {
+        try topicFileManager.restoreTopics(from: snapshots)
         loadVocabulary()
     }
 }

@@ -1,20 +1,72 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+private enum DocumentPickerPurpose {
+    case importTopics
+    case manualSave
+    case manualLoad
+    case autoSaveFolder
+
+    var contentTypes: [UTType] {
+        switch self {
+        case .importTopics:
+            return [.commaSeparatedText, .zip]
+        case .manualSave:
+            return [.folder]
+        case .manualLoad:
+            return [.folder, .json]
+        case .autoSaveFolder:
+            return [.folder]
+        }
+    }
+}
+
+private enum TopicStateAlert: Identifiable {
+    case success(String)
+    case failure(String)
+
+    var id: String {
+        switch self {
+        case .success(let message):
+            return "state-success-\(message)"
+        case .failure(let message):
+            return "state-failure-\(message)"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .success:
+            return "State Update"
+        case .failure:
+            return "State Error"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .success(let message):
+            return message
+        case .failure(let message):
+            return message
+        }
+    }
+}
+
 struct TopicModeView: View {
     @EnvironmentObject private var vocabularyStore: VocabularyStore
     @ObservedObject var practiceStore: PracticeStore
     @EnvironmentObject private var topicProgressStore: TopicProgressStore
     @EnvironmentObject private var topicSessionStore: TopicSessionStore
-    @EnvironmentObject private var autoSaveCoordinator: AutoSaveCoordinator
+    @EnvironmentObject private var statePersistenceCoordinator: StatePersistenceCoordinator
 
-    @State private var showImporter = false
     @State private var isImporting = false
     @State private var activeAlert: ImportAlert?
     @State private var topicPendingDeletion: VocabularyTopic?
-    @State private var stateAlert: StateAlert?
-    @State private var showFolderEditor = false
-    @State private var folderNameDraft = AppStateSaver.stateFolderName
+    @State private var stateAlert: TopicStateAlert?
+    @State private var documentPickerPurpose: DocumentPickerPurpose?
+    @State private var documentPickerTypes: [UTType] = []
+    @State private var showDocumentPicker = false
 
     private var topics: [VocabularyTopic] {
         vocabularyStore.topics
@@ -65,41 +117,53 @@ struct TopicModeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
-                        Section {
-                            Button("Save state", action: saveAppState)
-                            Button("Load state", action: loadAppState)
-                            Toggle("Auto-save on change", isOn: $autoSaveCoordinator.isEnabled)
-                        }
-                        Button("Change save folder…") {
-                            folderNameDraft = AppStateSaver.stateFolderName
-                            showFolderEditor = true
-                        }
-                        Button("Open in Files") {
-                            openInFiles()
+                        Button("Save state…") { presentDocumentPicker(for: .manualSave) }
+                        Button("Load state…") { presentDocumentPicker(for: .manualLoad) }
+                        Divider()
+                        if let folderName = statePersistenceCoordinator.autoSaveFolderName {
+                            Button("Change auto-save folder…") {
+                                presentDocumentPicker(for: .autoSaveFolder)
+                            }
+                            Button("Stop auto-save", role: .destructive) {
+                                statePersistenceCoordinator.clearAutoSaveFolder()
+                                stateAlert = .success("Auto-save disabled.")
+                            }
+                            Text("Saving to \(folderName)")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Button("Set auto-save folder…") {
+                                presentDocumentPicker(for: .autoSaveFolder)
+                            }
+                            Text("Auto-save off")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
                         }
                     } label: {
                         Label("State", systemImage: "externaldrive")
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button(action: { showImporter = true }) {
+                    Button(action: { presentDocumentPicker(for: .importTopics) }) {
                         Label("Import", systemImage: "square.and.arrow.down")
                     }
                     .disabled(isImporting)
                 }
             }
-            .fileImporter(isPresented: $showImporter,
-                          allowedContentTypes: [.commaSeparatedText, .zip],
+            .fileImporter(isPresented: $showDocumentPicker,
+                          allowedContentTypes: documentPickerTypes,
                           allowsMultipleSelection: false) { result in
+                guard let purpose = documentPickerPurpose else { return }
+                documentPickerPurpose = nil
                 switch result {
                 case .success(let urls):
                     guard let url = urls.first else { return }
-                    importFile(at: url)
+                    handleDocument(url: url, purpose: purpose)
                 case .failure(let error):
                     if let nsError = error as NSError?, nsError.code == NSUserCancelledError {
                         return
                     }
-                    activeAlert = .failure(error.localizedDescription)
+                    handleDocumentFailure(error, purpose: purpose)
                 }
             }
             .alert(item: $activeAlert) { alert in
@@ -113,6 +177,11 @@ struct TopicModeView: View {
                                  message: Text(message),
                                  dismissButton: .default(Text("OK")))
                 }
+            }
+            .alert(item: $stateAlert) { alert in
+                Alert(title: Text(alert.title),
+                      message: Text(alert.message),
+                      dismissButton: .default(Text("OK")))
             }
             .confirmationDialog("Delete Topic?",
                                 isPresented: Binding(get: {
@@ -132,39 +201,6 @@ struct TopicModeView: View {
             } message: {
                 if let topic = topicPendingDeletion {
                     Text("This removes \(topic.displayName) and clears any related practice data.")
-                }
-            }
-            .alert(item: $stateAlert) { alert in
-                Alert(title: Text(alert.title),
-                      message: Text(alert.message),
-                      dismissButton: .default(Text("OK")))
-            }
-        }
-        .sheet(isPresented: $showFolderEditor) {
-            NavigationView {
-                Form {
-                    Section(header: Text("Save folder name")) {
-                        TextField("Folder name", text: $folderNameDraft)
-                            .autocapitalization(.none)
-                    }
-                    Section {
-                        Text("Current location: Files ▸ On My iPhone ▸ \(folderNameDraft.isEmpty ? AppStateSaver.stateFolderName : folderNameDraft)")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .navigationTitle("Save Folder")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { showFolderEditor = false }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            AppStateSaver.updateStateFolderName(folderNameDraft)
-                            showFolderEditor = false
-                            stateAlert = .success("Folder set to \(AppStateSaver.stateFolderName).")
-                        }
-                    }
                 }
             }
         }
@@ -245,38 +281,173 @@ struct TopicModeView: View {
         }
     }
 
+    private func presentDocumentPicker(for purpose: DocumentPickerPurpose) {
+        documentPickerPurpose = purpose
+        documentPickerTypes = purpose.contentTypes
+        showDocumentPicker = true
+    }
 
-    private func openInFiles() {
-        let folderURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            .appendingPathComponent(AppStateSaver.stateFolderName, isDirectory: true)
-        UIApplication.shared.open(folderURL, options: [:], completionHandler: { success in
-            if !success {
-                stateAlert = .failure("Unable to open Files.")
+    private func handleDocument(url: URL, purpose: DocumentPickerPurpose) {
+        switch purpose {
+        case .importTopics:
+            importFile(at: url)
+        case .manualSave:
+            saveStateManually(to: url)
+        case .manualLoad:
+            loadStateManually(from: url)
+        case .autoSaveFolder:
+            configureAutoSaveFolder(with: url)
+        }
+    }
+
+    private func handleDocumentFailure(_ error: Error, purpose: DocumentPickerPurpose) {
+        switch purpose {
+        case .importTopics:
+            activeAlert = .failure(error.localizedDescription)
+        case .manualSave, .manualLoad, .autoSaveFolder:
+            stateAlert = .failure(error.localizedDescription)
+        }
+    }
+
+    private func saveStateManually(to folderURL: URL) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let needsAccess = folderURL.startAccessingSecurityScopedResource()
+            defer {
+                if needsAccess {
+                    folderURL.stopAccessingSecurityScopedResource()
+                }
             }
-        })
-    }
-    private func saveAppState() {
-        do {
-            _ = try AppStateSaver.save(practiceStore: practiceStore,
-                                       topicProgressStore: topicProgressStore,
-                                       topicSessionStore: topicSessionStore)
-            stateAlert = .success("State saved to Files ▸ On My iPhone ▸ FlashCardsState.")
-        } catch {
-            stateAlert = .failure(error.localizedDescription)
+            do {
+                let fileURL = try statePersistenceCoordinator.manualSave(to: folderURL)
+                let name = friendlyName(for: fileURL.deletingLastPathComponent())
+                DispatchQueue.main.async {
+                    stateAlert = .success("State saved to \(name).")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    stateAlert = .failure(error.localizedDescription)
+                }
+            }
         }
     }
 
-    private func loadAppState() {
-        do {
-            let snapshot = try AppStateSaver.load()
-            practiceStore.load(states: snapshot.practiceStates)
-            topicProgressStore.load(states: snapshot.topicProgressStates)
-            topicSessionStore.load(snapshots: snapshot.topicSessionSnapshots)
-            stateAlert = .success("State loaded successfully.")
-        } catch {
-            stateAlert = .failure(error.localizedDescription)
+    private func loadStateManually(from url: URL) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let needsAccess = url.startAccessingSecurityScopedResource()
+            defer {
+                if needsAccess {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            do {
+                let snapshot = try statePersistenceCoordinator.manualLoad(from: url)
+                let name = friendlyName(for: url)
+                DispatchQueue.main.async {
+                    do {
+                        try applySnapshot(snapshot)
+                        stateAlert = .success("State loaded from \(name).")
+                    } catch {
+                        stateAlert = .failure(error.localizedDescription)
+                    }
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    stateAlert = .failure(error.localizedDescription)
+                }
+            }
         }
     }
+
+    private func configureAutoSaveFolder(with folderURL: URL) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let needsAccess = folderURL.startAccessingSecurityScopedResource()
+            defer {
+                if needsAccess {
+                    folderURL.stopAccessingSecurityScopedResource()
+                }
+            }
+            do {
+                try statePersistenceCoordinator.setAutoSaveFolder(folderURL)
+                let name = friendlyName(for: folderURL)
+                DispatchQueue.main.async {
+                    stateAlert = .success("Auto-save enabled for \(name).")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    stateAlert = .failure(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    private func applySnapshot(_ snapshot: AppStateSnapshot) throws {
+        if !snapshot.userTopics.isEmpty {
+            try vocabularyStore.restoreUserTopics(from: snapshot.userTopics)
+        } else {
+            vocabularyStore.loadVocabulary()
+        }
+
+        let entryKeyBySavedID = Dictionary(uniqueKeysWithValues: snapshot.entrySignatures.map { ($0.entryID, $0.key) })
+        let practiceStatesByKey: [String: PracticeCardState] = snapshot.entrySignatures.reduce(into: [:]) { result, signature in
+            if let state = snapshot.practiceStates[signature.entryID] {
+                result[signature.key] = state
+            }
+        }
+
+        var newPracticeStates: [String: PracticeCardState] = [:]
+        var entryIDByKey: [String: String] = [:]
+        for topic in vocabularyStore.topics {
+            let isUser = topic.sourceURL != nil
+            for entry in topic.entries {
+                let key = EntrySignatureSnapshot.makeKey(topicName: topic.name,
+                                                         isUserTopic: isUser,
+                                                         german: entry.german,
+                                                         english: entry.english)
+                entryIDByKey[key] = entry.id
+                if let state = practiceStatesByKey[key] {
+                    newPracticeStates[entry.id] = state
+                }
+            }
+        }
+        practiceStore.load(states: newPracticeStates)
+
+        let topicSignaturesByID = Dictionary(uniqueKeysWithValues: snapshot.topicSignatures.map { ($0.topicID, $0.key) })
+        var savedTopicStatesByKey: [String: TopicProgressState] = [:]
+        for (topicID, state) in snapshot.topicProgressStates {
+            guard let key = topicSignaturesByID[topicID] else { continue }
+            savedTopicStatesByKey[key] = state
+        }
+
+        var newTopicStates: [String: TopicProgressState] = [:]
+        for topic in vocabularyStore.topics {
+            let key = TopicSignatureSnapshot.makeKey(name: topic.name,
+                                                     isUserTopic: topic.sourceURL != nil)
+            guard var savedState = savedTopicStatesByKey[key] else { continue }
+            let mappedCompleted: Set<String> = Set(savedState.completedCardIDs.compactMap { oldID in
+                guard let entryKey = entryKeyBySavedID[oldID] else { return nil }
+                return entryIDByKey[entryKey]
+            })
+            savedState.completedCardIDs = mappedCompleted
+            newTopicStates[topic.id] = savedState
+        }
+        topicProgressStore.load(states: newTopicStates)
+    }
+
+    private func friendlyName(for url: URL) -> String {
+        let isDirectory: Bool
+        if let value = try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory {
+            isDirectory = value ?? url.hasDirectoryPath
+        } else {
+            isDirectory = url.hasDirectoryPath
+        }
+        if isDirectory {
+            let name = url.lastPathComponent
+            return name.isEmpty ? url.path : name
+        }
+        let name = url.lastPathComponent
+        return name.isEmpty ? url.path : name
+    }
+
 
     private enum ImportAlert: Identifiable {
         case success(String)
@@ -292,28 +463,6 @@ struct TopicModeView: View {
         }
     }
 
-    private enum StateAlert: Identifiable {
-        case success(String)
-        case failure(String)
-
-        var id: String { message }
-        var title: String {
-            switch self {
-            case .success:
-                return "State Update"
-            case .failure:
-                return "State Error"
-            }
-        }
-        var message: String {
-            switch self {
-            case .success(let message):
-                return message
-            case .failure(let message):
-                return message
-            }
-        }
-    }
 }
 
 private struct TopicDetailView: View {
@@ -488,4 +637,5 @@ private struct ManualCompletionEditor: View {
             }
         }
     }
+
 }

@@ -115,6 +115,31 @@ final class TopicFileManager {
         }
     }
 
+    func restoreTopics(from snapshots: [TopicDataSnapshot]) throws {
+        let fm = fileManager
+        if !fm.fileExists(atPath: topicsDirectory.path) {
+            try fm.createDirectory(at: topicsDirectory, withIntermediateDirectories: true)
+        }
+        if fm.fileExists(atPath: topicsDirectory.path) {
+            let contents = try fm.contentsOfDirectory(at: topicsDirectory, includingPropertiesForKeys: nil)
+            for url in contents {
+                try fm.removeItem(at: url)
+            }
+        }
+        for snapshot in snapshots {
+            let sanitizedName = sanitize(fileName: snapshot.name)
+            let destination = uniqueDestinationURL(for: sanitizedName)
+            let header = "German,Plural,English\n"
+            var body = header
+            for entry in snapshot.entries {
+                let values = entry.csvValues().map { escapeForCSV($0) }
+                body.append(values.joined(separator: ","))
+                body.append("\n")
+            }
+            try body.write(to: destination, atomically: true, encoding: .utf8)
+        }
+    }
+
     private func uniqueDestinationURL(for fileName: String) -> URL {
         let sanitized = sanitize(fileName: fileName)
         let baseURL = URL(fileURLWithPath: sanitized)
@@ -142,6 +167,12 @@ final class TopicFileManager {
             sanitized.append(".csv")
         }
         return sanitized
+    }
+
+    private func escapeForCSV(_ value: String) -> String {
+        var escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
+        escaped = escaped.replacingOccurrences(of: "\n", with: " ")
+        return "\"\(escaped)\""
     }
 
     private func unzipArchive(at sourceURL: URL, to destinationURL: URL) throws {

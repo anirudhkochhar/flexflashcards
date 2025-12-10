@@ -20,12 +20,12 @@
 		1BFC393B2B1FF8D200F6A019 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BFC391B2B1FF8D200F6A019 /* Preview Assets.xcassets */; };
 		1BFC39402B1FFB6A00F6A019 /* csv_files in Resources */ = {isa = PBXBuildFile; fileRef = 1BFC39412B1FFB6A00F6A019 /* csv_files */; };
 		1BFC39422B1FFC6F00F6A019 /* VocabularyTopic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39442B1FFC6F00F6A019 /* VocabularyTopic.swift */; };
-	1BFC39432B1FFC6F00F6A019 /* TopicModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */; };
-	1BFC39482B208C5F00F6A019 /* TopicProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */; };
+		1BFC39432B1FFC6F00F6A019 /* TopicModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */; };
+		1BFC39482B208C5F00F6A019 /* TopicProgressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */; };
 		1BFC39462B20047800F6A019 /* TopicFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39472B20047800F6A019 /* TopicFileManager.swift */; };
 		1BFC394A2B21325100F6A019 /* TopicSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */; };
-		1BFC394C2B214E1B00F6A019 /* AutoSaveCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC394D2B214E1B00F6A019 /* AutoSaveCoordinator.swift */; };
-		1BFC394E2B21535400F6A019 /* AppStateSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC394F2B21535400F6A019 /* AppStateSaver.swift */; };
+		1BFC39512B217C4700F6A019 /* StatePersistenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39502B217C4700F6A019 /* StatePersistenceCoordinator.swift */; };
+		1BFC39542B219D8F00F6A019 /* AppStateSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BFC39532B219D8F00F6A019 /* AppStateSnapshot.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,12 +44,12 @@
 		1BFC391C2B1FF8D200F6A019 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1BFC39412B1FFB6A00F6A019 /* csv_files */ = {isa = PBXFileReference; lastKnownFileType = folder; path = csv_files; sourceTree = "<group>"; };
 		1BFC39442B1FFC6F00F6A019 /* VocabularyTopic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyTopic.swift; sourceTree = "<group>"; };
-	1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicModeView.swift; sourceTree = "<group>"; };
-	1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicProgressStore.swift; sourceTree = "<group>"; };
+		1BFC39452B1FFC6F00F6A019 /* TopicModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicModeView.swift; sourceTree = "<group>"; };
+		1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicProgressStore.swift; sourceTree = "<group>"; };
+		1BFC39502B217C4700F6A019 /* StatePersistenceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatePersistenceCoordinator.swift; sourceTree = "<group>"; };
+		1BFC39532B219D8F00F6A019 /* AppStateSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateSnapshot.swift; sourceTree = "<group>"; };
 		1BFC39472B20047800F6A019 /* TopicFileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicFileManager.swift; sourceTree = "<group>"; };
 		1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopicSessionStore.swift; sourceTree = "<group>"; };
-		1BFC394D2B214E1B00F6A019 /* AutoSaveCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoSaveCoordinator.swift; sourceTree = "<group>"; };
-		1BFC394F2B21535400F6A019 /* AppStateSaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateSaver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +101,7 @@
 				1BFC39122B1FF8D200F6A019 /* VocabularyEntry.swift */,
 				1BFC39132B1FF8D200F6A019 /* PracticeCardState.swift */,
 				1BFC39442B1FFC6F00F6A019 /* VocabularyTopic.swift */,
+				1BFC39532B219D8F00F6A019 /* AppStateSnapshot.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -108,13 +109,12 @@
 		1BFC39222B1FF8D200F6A019 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-			1BFC39142B1FF8D200F6A019 /* VocabularyLoader.swift */,
-			1BFC39152B1FF8D200F6A019 /* PracticeStore.swift */,
-			1BFC39472B20047800F6A019 /* TopicFileManager.swift */,
-			1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */,
-			1BFC394D2B214E1B00F6A019 /* AutoSaveCoordinator.swift */,
-			1BFC394F2B21535400F6A019 /* AppStateSaver.swift */,
-			1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */,
+				1BFC39142B1FF8D200F6A019 /* VocabularyLoader.swift */,
+				1BFC39152B1FF8D200F6A019 /* PracticeStore.swift */,
+				1BFC39472B20047800F6A019 /* TopicFileManager.swift */,
+				1BFC394B2B21325100F6A019 /* TopicSessionStore.swift */,
+				1BFC39492B208C5F00F6A019 /* TopicProgressStore.swift */,
+				1BFC39502B217C4700F6A019 /* StatePersistenceCoordinator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -222,8 +222,6 @@
 				1BFC39352B1FF8D200F6A019 /* PracticeStore.swift in Sources */,
 				1BFC39462B20047800F6A019 /* TopicFileManager.swift in Sources */,
 				1BFC394A2B21325100F6A019 /* TopicSessionStore.swift in Sources */,
-				1BFC394C2B214E1B00F6A019 /* AutoSaveCoordinator.swift in Sources */,
-				1BFC394E2B21535400F6A019 /* AppStateSaver.swift in Sources */,
 			1BFC39422B1FFC6F00F6A019 /* VocabularyTopic.swift in Sources */,
 			1BFC39482B208C5F00F6A019 /* TopicProgressStore.swift in Sources */,
 				1BFC39322B1FF8D200F6A019 /* VocabularyEntry.swift in Sources */,
@@ -232,6 +230,8 @@
 				1BFC39342B1FF8D200F6A019 /* VocabularyLoader.swift in Sources */,
 				1BFC39372B1FF8D200F6A019 /* PracticeDeckView.swift in Sources */,
 				1BFC39302B1FF8D200F6A019 /* FlashCardsApp.swift in Sources */,
+				1BFC39512B217C4700F6A019 /* StatePersistenceCoordinator.swift in Sources */,
+				1BFC39542B219D8F00F6A019 /* AppStateSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
